@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://footballlegacy.co.uk/sitemap.xml
