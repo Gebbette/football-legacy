@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const assetBase = new URL('assets/honours/', document.currentScript.src).href;
+  const assetBase = new URL('./', document.currentScript.src).href;
   const scenes = {
     premier: {asset:'premier-league',category:'LEAGUE CHAMPIONS',opening:['Every match.','Every point.','All yours.'],headline:['Champions.'],note:'The title belongs to you.',label:'Premier League',duration:6400},
     league: {asset:'cup',category:'LEAGUE CHAMPIONS',opening:['A season of belief.','A place in history.'],headline:['Champions.'],note:'The title belongs to you.',duration:6100},
