@@ -180,3 +180,19 @@
   .flCinema .flCinemaTrophyWrap{display:flex!important;align-items:center!important;justify-content:center!important}.flCinema .flCinemaTrophy{object-fit:contain!important;object-position:center center!important}
   .flCinemaStageGlow{opacity:.28!important;transform:translate(-50%,-50%) scale(.92)!important}.flCinemaPedestal{opacity:.62!important;transform:translateX(-50%) scaleX(1)!important}.flCinemaSpotlights i{opacity:.12!important}.flCinemaPlayerFigure{opacity:.25!important;transform:none!important}.flCinemaSelectionCard{transform:translate(-50%,0)!important}
 }
+
+
+/* V103 — multiplayer-only Ballon d'Or suspense reveal. */
+.flCinema[data-shared-ballon="1"] .flCinemaAnnouncement{z-index:18}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelope{filter:drop-shadow(0 34px 56px #000c) drop-shadow(0 0 30px rgba(224,193,138,.2))}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelope:before{content:'';position:absolute;inset:-58px;z-index:-2;border-radius:50%;background:radial-gradient(circle,rgba(224,193,138,.19),rgba(224,193,138,.045) 39%,transparent 68%);animation:flSharedBallonAura 1.35s ease-in-out infinite alternate}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard{box-shadow:0 20px 44px #000b,0 0 0 1px rgba(224,193,138,.4);background:linear-gradient(145deg,#f6f0e4,#e8ddca)}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard:after{content:'';position:absolute;inset:11px;z-index:0;pointer-events:none;background:linear-gradient(112deg,transparent 26%,rgba(255,255,255,.52) 43%,transparent 58%);transform:translateX(-145%);animation:flSharedBallonCardShine 1.8s 2.7s ease-in-out 1 both}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard strong{font-size:34px;color:#17110a;text-shadow:0 1px 0 #fff8!important}
+.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard small{color:#6f5c3a;font-weight:800}
+.flCinema[data-shared-ballon="1"] .flCinemaSeal{box-shadow:0 0 0 7px rgba(224,193,138,.08),0 8px 18px #0007}
+.flCinema[data-shared-ballon="1"] .flCinemaProgress i{background:linear-gradient(90deg,#7a531e,#e3c887,#fff2c5)}
+@keyframes flSharedBallonAura{from{transform:scale(.94);opacity:.55}to{transform:scale(1.06);opacity:1}}
+@keyframes flSharedBallonCardShine{0%{transform:translateX(-145%)}100%{transform:translateX(145%)}}
+@media(max-width:640px){.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard strong{font-size:29px}.flCinema[data-shared-ballon="1"] .flCinemaEnvelope:before{inset:-38px}}
+@media(prefers-reduced-motion:reduce){.flCinema[data-shared-ballon="1"] .flCinemaEnvelope:before,.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard:after{animation:none!important}}

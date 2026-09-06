@@ -5,6 +5,61 @@
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const assetBase = new URL('./', document.currentScript.src).href;
 
+  // Shared multiplayer Ballon d'Or audio is synthesized locally with Web Audio.
+  // The context is primed from the review-ready click so mobile browsers permit later playback.
+  let sharedAudioContext = null;
+  function primeAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return false;
+      sharedAudioContext ||= new AudioCtx();
+      if (sharedAudioContext.state === 'suspended') sharedAudioContext.resume().catch(()=>{});
+      return true;
+    } catch (_) { return false; }
+  }
+  function playSharedBallonDrumRoll(revealDelayMs) {
+    try {
+      if (!primeAudio() || sharedAudioContext.state !== 'running') return () => {};
+      const ctx = sharedAudioContext, out = ctx.createGain();
+      out.gain.value = .0001; out.connect(ctx.destination);
+      const now = ctx.currentTime + .05;
+      const revealAt = now + Math.max(3.2, revealDelayMs / 1000);
+      out.gain.setValueAtTime(.0001, now);
+      out.gain.exponentialRampToValueAtTime(.18, now + .35);
+      out.gain.linearRampToValueAtTime(.32, revealAt - .18);
+      out.gain.exponentialRampToValueAtTime(.0001, revealAt + .95);
+      const makeHit = (time, strength, duration=.055) => {
+        const frames=Math.max(1,Math.floor(ctx.sampleRate*duration));
+        const buffer=ctx.createBuffer(1,frames,ctx.sampleRate), data=buffer.getChannelData(0);
+        for(let i=0;i<frames;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/frames,1.7);
+        const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), gain=ctx.createGain();
+        src.buffer=buffer; filter.type='bandpass'; filter.frequency.value=1550; filter.Q.value=.75; gain.gain.value=strength;
+        src.connect(filter); filter.connect(gain); gain.connect(out); src.start(time);
+      };
+      let t=now+.4, step=.2, n=0;
+      while(t<revealAt-.18){
+        const progress=(t-now)/(revealAt-now);
+        makeHit(t,.18+progress*.47,.05);
+        if(n%2===1) makeHit(t+.025,.08+progress*.22,.035);
+        step=Math.max(.063,.2-progress*.14); t+=step; n++;
+      }
+      const pulse=(time,gainValue=.12)=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.type='sine'; osc.frequency.setValueAtTime(94,time); osc.frequency.exponentialRampToValueAtTime(48,time+.24);
+        g.gain.setValueAtTime(.0001,time); g.gain.exponentialRampToValueAtTime(gainValue,time+.018); g.gain.exponentialRampToValueAtTime(.0001,time+.3);
+        osc.connect(g); g.connect(out); osc.start(time); osc.stop(time+.31);
+      };
+      pulse(now+1.55,.10); pulse(now+2.65,.12); pulse(now+3.75,.15);
+      pulse(revealAt,.34);
+      const frames=Math.floor(ctx.sampleRate*.9), buffer=ctx.createBuffer(1,frames,ctx.sampleRate), data=buffer.getChannelData(0);
+      for(let i=0;i<frames;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/frames,2.2);
+      const crash=ctx.createBufferSource(), hp=ctx.createBiquadFilter(), cg=ctx.createGain();
+      crash.buffer=buffer; hp.type='highpass'; hp.frequency.value=3200; cg.gain.setValueAtTime(.22,revealAt); cg.gain.exponentialRampToValueAtTime(.0001,revealAt+.86);
+      crash.connect(hp); hp.connect(cg); cg.connect(out); crash.start(revealAt);
+      return () => { try { out.disconnect(); } catch (_) {} };
+    } catch (_) { return () => {}; }
+  }
+
   const scenes = {
     ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:9200, intro:'envelope', prestige:7, figure:true},
     world:       {asset:'world-cup',         category:'WORLD CHAMPIONS',               opening:['For the shirt.','For the nation.','For history.'], headline:['On top of','the world.'], note:'A moment for an entire nation.', label:'World Cup', duration:7900, prestige:7},
@@ -85,11 +140,12 @@
     </div>`;
   }
 
-  function html({season = {}, player = {}, items = [], type = 'trophy', buttonId = 'flCinemaContinue', buttonLabel = 'Continue', tier = 3}) {
+  function html({season = {}, player = {}, items = [], type = 'trophy', buttonId = 'flCinemaContinue', buttonLabel = 'Continue', tier = 3, sharedBallon = false}) {
     if (!items.length) return '';
     const name = String(items[0]);
     const scene = sceneFor(name, type);
     const config = scenes[scene];
+    const isSharedBallon = !!sharedBallon && scene === 'ballon';
     const winner = player.name || 'Your player';
     const affiliation = scene === 'world' ? (player.nationality || season.club) : season.club;
     const title = config.label || name;
@@ -101,7 +157,7 @@
       ? selectionMarkup(winner, player.position)
       : `<div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetUrl}" alt="" width="400" height="440" decoding="sync" loading="eager"></div>`;
 
-    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${config.duration}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
+    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 11000 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
       <div class="flCinemaAtmosphere" aria-hidden="true"><div class="flCinemaWash"></div><div class="flCinemaHorizon"></div><div class="flCinemaLines"><i></i><i></i><i></i><i></i><i></i></div><div class="flCinemaOrbit"><i></i><i></i><i></i></div><div class="flCinemaStandard flCinemaStandardLeft"></div><div class="flCinemaStandard flCinemaStandardRight"></div></div>
       <header class="flCinemaHeader"><a class="flCinemaBrand" href="index.html" aria-label="Football Legacy home">FL<span>/</span> <b>FOOTBALL LEGACY</b></a><span class="flCinemaEdition">${escape(season.label || 'CAREER HONOURS')}</span></header>
       ${intro.startsWith('envelope') ? envelopeMarkup(winner, title, intro === 'envelope-fast') : ''}
@@ -126,7 +182,8 @@
     const button = root.querySelector('.flCinemaContinue');
     const skip = root.querySelector('.flCinemaSkip');
     const previousFocus = document.activeElement;
-    let finished = false, timer;
+    const sharedBallon = root.dataset.sharedBallon === '1' && root.dataset.scene === 'ballon';
+    let finished = false, timer, audioStop = null;
 
     const animate = (selector, frames, options = {}) => {
       root.querySelectorAll(selector).forEach((el, i) => {
@@ -142,6 +199,7 @@
       const moveFocus = focus && document.activeElement === skip;
       finished = true;
       clearTimeout(timer);
+      audioStop?.(); audioStop = null;
       animations.forEach(animation => animation.cancel());
       root.classList.add('is-settled');
       button.disabled = false;
@@ -159,6 +217,7 @@
     const mediaChange = event => { if (event.matches) finish(); };
     const controller = {finish,dispose() {
       clearTimeout(timer);
+      audioStop?.(); audioStop = null;
       animations.forEach(animation => animation.cancel());
       reducedMotion.removeEventListener('change', mediaChange);
       root.removeEventListener('keydown', keydown);
@@ -176,17 +235,38 @@
     const scene = root.dataset.scene;
     const intro = root.dataset.intro;
     const prestige = Number(root.dataset.prestige) || 1;
-    const reveal = ({ballon:4250,world:3150,europe:2900,premier:2650,global:3850,goldenboot:3850,goldenglove:3700,youth:3450,playeraward:3500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800;
+    const reveal = sharedBallon ? 5600 : (({ballon:4250,world:3150,europe:2900,premier:2650,global:3850,goldenboot:3850,goldenglove:3700,youth:3450,playeraward:3500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
 
     // Opening: premium individual honours use the requested envelope/name-card reveal.
     if (intro.startsWith('envelope')) {
       const fast = intro === 'envelope-fast';
       const speed = fast ? .82 : 1, nameHold = 1000;
-      animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed)+nameHold,delay:120});
-      animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(28px) scale(.94)'},{opacity:1,transform:'none'}],{duration:Math.round(650*speed),delay:180});
-      animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:Math.round(700*speed),delay:Math.round(720*speed),easing:'cubic-bezier(.3,.05,.2,1)'});
-      animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:Math.round(260*speed),delay:Math.round(700*speed)});
-      animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.12},{transform:'translateY(-48px)',opacity:1,offset:.48},{transform:'translateY(-48px)',opacity:1,offset:.91},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed)+nameHold,delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
+      if (sharedBallon) {
+        // Multiplayer signature reveal: the winner name never fades. It holds, then the envelope slides off-screen.
+        animate('.flCinemaAnnouncement',[
+          {opacity:0,transform:'translateY(18px) scale(.98)'},
+          {opacity:1,transform:'none',offset:.10},
+          {opacity:1,transform:'none',offset:.84},
+          {opacity:1,transform:'translateY(78vh) scale(.96)'}
+        ],{duration:5450,delay:100,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:860,delay:240});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:850,delay:1050,easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.14)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:390,delay:1000});
+        animate('.flCinemaEnvelopeCard',[
+          {transform:'translateY(82px) scale(.98)',opacity:0},
+          {transform:'translateY(82px) scale(.98)',opacity:1,offset:.12},
+          {transform:'translateY(-60px) scale(1.035)',opacity:1,offset:.53},
+          {transform:'translateY(-60px) scale(1.035)',opacity:1}
+        ],{duration:1600,delay:1500,easing:'cubic-bezier(.14,.82,.18,1)'});
+        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.9)'},{filter:'brightness(1.12)',offset:.5},{filter:'brightness(1)'}],{duration:1300,delay:3020,easing:'ease-in-out'});
+        audioStop = playSharedBallonDrumRoll(reveal - 160);
+      } else {
+        animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed)+nameHold,delay:120});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(28px) scale(.94)'},{opacity:1,transform:'none'}],{duration:Math.round(650*speed),delay:180});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:Math.round(700*speed),delay:Math.round(720*speed),easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:Math.round(260*speed),delay:Math.round(700*speed)});
+        animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.12},{transform:'translateY(-48px)',opacity:1,offset:.48},{transform:'translateY(-48px)',opacity:1,offset:.91},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed)+nameHold,delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
+      }
     } else {
       animate('.flCinemaIntroOverline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:420,delay:100});
       animate('.flCinemaIntroLine',[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}],{duration:700,delay:220,stagger:260});
@@ -282,7 +362,7 @@
     next(); return true;
   }
 
-  window.FLCinema = Object.freeze({html,sceneFor,showFlash,finish:root => active.get(root)?.finish()});
+  window.FLCinema = Object.freeze({html,sceneFor,showFlash,primeAudio,finish:root => active.get(root)?.finish()});
   new MutationObserver(sync).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',sync,{once:true}); else sync();
 })();
