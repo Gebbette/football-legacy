@@ -25,6 +25,14 @@ body.mp-entry-open{overflow:hidden}
 @media(max-width:720px){.mpSharedSetup{grid-template-columns:1fr}.mpSharedSetupGrid{grid-template-columns:1fr 1fr}}
 @media(max-width:430px){.mpSharedSetupGrid{grid-template-columns:1fr}}
 
-/* V9 host rarity randomiser */
-.mpRandomRarity{margin-top:8px;width:100%;min-height:42px;font-size:12px;letter-spacing:.01em;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)}
-.mpRandomRarity:hover{filter:brightness(1.08)}
+/* V102 — multiplayer fairness, saved footballer identity and shared Ballon d'Or reveal */
+.mpNameHint{display:block;margin:6px 1px 0;color:var(--mp-muted);font-size:8px;line-height:1.4}
+.mpCareerNameEdit{display:grid;gap:6px;margin:10px 0 14px;padding:11px 12px;border-radius:14px;border:1px solid rgba(255,217,108,.18);background:rgba(255,217,108,.045);color:#e8dcc0;font-size:8px;font-weight:1000;letter-spacing:.06em}
+.mpCareerNameEdit input{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#090f19;color:#fff;font:inherit;font-size:13px;letter-spacing:0;outline:none}
+.mpCareerNameEdit input:focus{border-color:rgba(255,217,108,.52);box-shadow:0 0 0 3px rgba(255,217,108,.08)}
+.mpCareerNameEdit small{font-size:8px;line-height:1.4;color:var(--mp-muted);font-weight:600;letter-spacing:0}
+.mpSharedBallonOverlay{padding-top:12px!important}.mpSharedBallonLive{width:min(1180px,100%);margin:0 auto;position:relative;padding-top:58px}.mpSharedBallonLive>.flCinema{width:100%}
+.mpSharedBallonBadge{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 12px;border:1px solid rgba(255,217,108,.22);border-radius:15px;background:linear-gradient(135deg,rgba(255,217,108,.08),rgba(255,255,255,.025));box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.mpSharedBallonBadge span{font-size:8px;font-weight:1000;letter-spacing:.13em;color:#ffd96c}.mpSharedBallonBadge b{font-size:12px;color:#fff}.mpSharedBallonBadge small{margin-left:auto;color:var(--mp-muted);font-size:8px;text-align:right}
+.quickTransferStack{display:grid;gap:9px}.quickTransferStack .quickActionCard{margin-bottom:0}.quickTransferRejectAll .quickReject{width:100%}
+@media(max-width:560px){.mpSharedBallonLive{padding-top:66px}.mpSharedBallonBadge{align-items:flex-start;flex-wrap:wrap}.mpSharedBallonBadge small{width:100%;margin-left:0;text-align:left}}

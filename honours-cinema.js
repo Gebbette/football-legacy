@@ -1,4 +1,4 @@
-/* Football Legacy honours cinema v100 — presentation only. No career state, RNG, storage or network writes. */
+/* Football Legacy honours cinema v102 — presentation only. No career state, RNG, storage or network writes. */
 (function () {
   'use strict';
 
@@ -6,15 +6,15 @@
   const assetBase = new URL('./', document.currentScript.src).href;
 
   const scenes = {
-    ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:8200, intro:'envelope', prestige:7, figure:true},
+    ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:9200, intro:'envelope', prestige:7, figure:true},
     world:       {asset:'world-cup',         category:'WORLD CHAMPIONS',               opening:['For the shirt.','For the nation.','For history.'], headline:['On top of','the world.'], note:'A moment for an entire nation.', label:'World Cup', duration:7900, prestige:7},
     europe:      {asset:'champions-league',  category:'EUROPEAN CHAMPIONS',            opening:['Under the lights.','Above them all.'], headline:['Europe.','Conquered.'], note:'Your name. Among the greats.', label:'Champions League', duration:7500, prestige:6},
     premier:     {asset:'premier-league',    category:'LEAGUE CHAMPIONS',              opening:['Every match.','Every point.','All yours.'], headline:['Champions.'], note:'The title belongs to you.', label:'Premier League', duration:6500, prestige:5},
-    global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:7100, intro:'envelope', prestige:5, figure:true},
-    goldenboot:  {asset:'golden-boot', assetExt:'png',      category:'SCORING HONOUR',                opening:[], headline:['Golden','Boot'],         note:'The season’s most feared finisher.', duration:6500, intro:'envelope', prestige:5},
-    goldenglove: {asset:'goalkeeper-glove', assetExt:'png',  category:'GOALKEEPING HONOUR',            opening:[], headline:['Golden','Glove'],        note:'Goalkeeping excellence, recognised.', duration:6100, intro:'envelope', prestige:4},
-    youth:       {asset:'award',             category:'YOUNG PLAYER HONOUR',           opening:[], headline:['The future.','Now.'],    note:'A breakthrough season recognised.', duration:5700, intro:'envelope-fast', prestige:4},
-    playeraward: {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:[], headline:['A season','apart.'],     note:'Excellence across an entire campaign.', duration:5900, intro:'envelope-fast', prestige:4},
+    global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:8100, intro:'envelope', prestige:5, figure:true},
+    goldenboot:  {asset:'golden-boot', assetExt:'png',      category:'SCORING HONOUR',                opening:[], headline:['Golden','Boot'],         note:'The season’s most feared finisher.', duration:7500, intro:'envelope', prestige:5},
+    goldenglove: {asset:'goalkeeper-glove', assetExt:'png',  category:'GOALKEEPING HONOUR',            opening:[], headline:['Golden','Glove'],        note:'Goalkeeping excellence, recognised.', duration:7100, intro:'envelope', prestige:4},
+    youth:       {asset:'award',             category:'YOUNG PLAYER HONOUR',           opening:[], headline:['The future.','Now.'],    note:'A breakthrough season recognised.', duration:6700, intro:'envelope-fast', prestige:4},
+    playeraward: {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:[], headline:['A season','apart.'],     note:'Excellence across an entire campaign.', duration:6900, intro:'envelope-fast', prestige:4},
     worldxi:     {asset:null,                category:'ELITE XI SELECTION',            opening:['Among the elite.','Your place is earned.'], headline:['Selected.'], note:'Your place among the season’s best.', duration:5600, prestige:4, selection:true},
     continental: {asset:'cup',               category:'CONTINENTAL HONOUR',            opening:['A European campaign.','A lasting reward.'], headline:['Continental','glory.'], note:'A continental chapter written.', duration:4900, prestige:3},
     international:{asset:'cup',              category:'INTERNATIONAL HONOUR',          opening:['For the nation.','For the moment.'], headline:['International','glory.'], note:'A national-team honour secured.', duration:5000, prestige:3},
@@ -176,17 +176,17 @@
     const scene = root.dataset.scene;
     const intro = root.dataset.intro;
     const prestige = Number(root.dataset.prestige) || 1;
-    const reveal = ({ballon:3250,world:3150,europe:2900,premier:2650,global:2850,goldenboot:2850,goldenglove:2700,youth:2450,playeraward:2500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800;
+    const reveal = ({ballon:4250,world:3150,europe:2900,premier:2650,global:3850,goldenboot:3850,goldenglove:3700,youth:3450,playeraward:3500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800;
 
     // Opening: premium individual honours use the requested envelope/name-card reveal.
     if (intro.startsWith('envelope')) {
       const fast = intro === 'envelope-fast';
-      const speed = fast ? .82 : 1;
-      animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed),delay:120});
+      const speed = fast ? .82 : 1, nameHold = 1000;
+      animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed)+nameHold,delay:120});
       animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(28px) scale(.94)'},{opacity:1,transform:'none'}],{duration:Math.round(650*speed),delay:180});
       animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:Math.round(700*speed),delay:Math.round(720*speed),easing:'cubic-bezier(.3,.05,.2,1)'});
       animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:Math.round(260*speed),delay:Math.round(700*speed)});
-      animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.18},{transform:'translateY(-48px)',opacity:1,offset:.74},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed),delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
+      animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.12},{transform:'translateY(-48px)',opacity:1,offset:.48},{transform:'translateY(-48px)',opacity:1,offset:.91},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed)+nameHold,delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
     } else {
       animate('.flCinemaIntroOverline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:420,delay:100});
       animate('.flCinemaIntroLine',[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}],{duration:700,delay:220,stagger:260});

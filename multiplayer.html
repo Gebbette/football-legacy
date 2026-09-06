@@ -95,11 +95,11 @@ body[data-mode="story"] .gameHead,body[data-mode="story"] .tabs{background:rgba(
 window.flTrack=function(name,options){try{if(typeof window.plausible==='function')window.plausible(name,options||{})}catch(e){}};
 </script>
 
-<link rel="stylesheet" href="multiplayer.css?v=91">
+<link rel="stylesheet" href="multiplayer.css?v=102">
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'" defer></script>
-<script src="multiplayer.js?v=91" defer></script>
-<link rel="stylesheet" href="honours-cinema.css?v=100">
-<script src="honours-cinema.js?v=100"></script>
+<script src="multiplayer.js?v=102" defer></script>
+<link rel="stylesheet" href="honours-cinema.css?v=102">
+<script src="honours-cinema.js?v=102"></script>
 
 </head>
 <body><div class="fl-sitebar" role="navigation" aria-label="Football Legacy website"><a class="fl-sitebrand" href="index.html"><i>FL</i><span>Football Legacy</span></a><nav class="fl-sitenav"><a href="index.html#modes">Modes</a><a href="about.html">About</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="legal.html">Legal</a></nav></div>
@@ -817,10 +817,11 @@ function tutorialExamplesHtml(){return `<section class="quickTutorialExamples" a
 
 function quickStoryCard(s){return `<section class="panel quickActionCard storyCallout" id="storyBox"><div class="eyebrow">DECISION</div><h3>${s.icon} ${esc(s.title)}</h3><p class="quickLead">What do you do?</p><div class="quickChoices">${s.choices.map((c,i)=>`<button class="quickChoice" data-story-choice="${i}">${esc(c[0])}</button>`).join('')}</div></section>`}
 
-function quickTransferCard(o,i){const fit=transferFitLabel(o.fit);return `<section class="panel quickActionCard" id="quickTransferOffer"><div class="quickTransferHead"><div class="crest">${initials(o.club)}</div><div><div class="eyebrow">TRANSFER OFFER</div><h3>${esc(o.club)}</h3><div class="quickStatusLine">${esc(o.division)}</div></div></div><div class="quickTransferFacts"><div class="quickTransferFact"><small>YOUR ROLE</small><b>${esc(o.role)}</b></div><div class="quickTransferFact"><small>TRANSFER FEE</small><b>${money(o.fee,o.currency)}</b></div><div class="quickTransferFact"><small>CAREER FIT</small><b>${o.fit}/100 — ${esc(fit)}</b><div class="quickFitBar"><i style="width:${o.fit}%"></i></div></div></div><div class="quickTransferActions"><button class="quickAccept" data-quick-accept="${i}">Accept Transfer</button><button class="quickReject" data-quick-reject>Reject Transfer</button></div></section>`}
+function quickTransferCard(o,i,total=1){const fit=transferFitLabel(o.fit);return `<section class="panel quickActionCard" id="quickTransferOffer-${i}"><div class="quickTransferHead"><div class="crest">${initials(o.club)}</div><div><div class="eyebrow">TRANSFER OFFER${total>1?` ${i+1} OF ${total}`:''}</div><h3>${esc(o.club)}</h3><div class="quickStatusLine">${esc(o.division)}</div></div></div><div class="quickTransferFacts"><div class="quickTransferFact"><small>YOUR ROLE</small><b>${esc(o.role)}</b></div><div class="quickTransferFact"><small>TRANSFER FEE</small><b>${money(o.fee,o.currency)}</b></div><div class="quickTransferFact"><small>CAREER FIT</small><b>${o.fit}/100 — ${esc(fit)}</b><div class="quickFitBar"><i style="width:${o.fit}%"></i></div></div></div><div class="quickTransferActions"><button class="quickAccept" data-quick-accept="${i}">Accept ${esc(o.club)}</button>${total===1?'<button class="quickReject" data-quick-reject>Reject Transfer</button>':''}</div></section>`}
+function quickTransferOffersHtml(){const offers=state.pendingOffers||[];if(offers.length<=1)return offers.length?quickTransferCard(offers[0],0,1):'';return `<div class="quickTransferStack"><section class="panel quickActionCard quickTransferSummary"><div class="eyebrow">TRANSFER MARKET</div><h3>${offers.length} clubs want to sign you.</h3><p class="quickLead">Compare every offer before choosing. Accepting one immediately closes the others.</p></section>${offers.map((o,i)=>quickTransferCard(o,i,offers.length)).join('')}<section class="panel quickActionCard quickTransferRejectAll"><button class="quickReject" data-quick-reject>Reject All Offers &amp; Stay at ${esc(state.player.club)}</button></section></div>`}
 
 function quickActionHtml(){
- if(state.pendingOffers?.length)return quickTransferCard(state.pendingOffers[0],0);
+ if(state.pendingOffers?.length)return quickTransferOffersHtml();
  if(state.pendingStory)return quickStoryCard(state.pendingStory);
  if(state.ended)return `<section class="panel quickActionCard"><div class="eyebrow">CAREER COMPLETE</div><h3>Your final legacy is ready.</h3><p class="quickLead">The full result is in Legacy.</p><button class="gold quickMainAction" id="viewLegacyAction">🏆 View Legacy</button></section>`;
  const saved=state.storyDecisionReady?`<div class="quickDecisionSaved">✓ Choice saved. Now play the season.</div>`:'';
