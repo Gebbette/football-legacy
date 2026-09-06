@@ -1,40 +1,114 @@
-/* Football Legacy: presentation only. No career state, RNG, storage or network writes. */
+/* Football Legacy honours cinema v100 — presentation only. No career state, RNG, storage or network writes. */
 (function () {
   'use strict';
+
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const assetBase = new URL('./', document.currentScript.src).href;
+
   const scenes = {
-    premier: {asset:'premier-league',category:'LEAGUE CHAMPIONS',opening:['Every match.','Every point.','All yours.'],headline:['Champions.'],note:'The title belongs to you.',label:'Premier League',duration:6400},
-    league: {asset:'cup',category:'LEAGUE CHAMPIONS',opening:['A season of belief.','A place in history.'],headline:['Champions.'],note:'The title belongs to you.',duration:6100},
-    europe: {asset:'champions-league',category:'EUROPEAN CHAMPIONS',opening:['Under the lights.','Above them all.'],headline:['Europe.','Conquered.'],note:'Your name. Among the greats.',duration:6900},
-    world: {asset:'world-cup',category:'WORLD CHAMPIONS',opening:['For the shirt.','For the nation.','For history.'],headline:['On top of','the world.'],note:'A moment for an entire nation.',label:'World Cup',duration:7200},
-    ballon: {asset:'ballon-dor',category:'THE HIGHEST INDIVIDUAL HONOUR',opening:['An extraordinary season.','One extraordinary player.'],headline:['Ballon','d’Or'],note:'Football’s greatest individual distinction.',label:'Ballon d’Or',duration:7400},
-    global: {asset:'global',category:'THE WORLD’S BEST',opening:['The game has spoken.','The world has chosen.'],headline:['The Best.'],note:'An exceptional season. A global honour.',duration:6700},
-    cup: {asset:'cup',category:'CUP WINNERS',opening:['The final whistle.','The lasting memory.'],headline:['Glory','is yours.'],note:'Another chapter written in silver.',duration:5800},
-    award: {asset:'award',category:'INDIVIDUAL HONOUR',opening:['An outstanding season.','An enduring achievement.'],headline:['A season','apart.'],note:'Excellence, recognised.',duration:5600}
+    ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:8200, intro:'envelope', prestige:7, figure:true},
+    world:       {asset:'world-cup',         category:'WORLD CHAMPIONS',               opening:['For the shirt.','For the nation.','For history.'], headline:['On top of','the world.'], note:'A moment for an entire nation.', label:'World Cup', duration:7900, prestige:7},
+    europe:      {asset:'champions-league',  category:'EUROPEAN CHAMPIONS',            opening:['Under the lights.','Above them all.'], headline:['Europe.','Conquered.'], note:'Your name. Among the greats.', label:'Champions League', duration:7500, prestige:6},
+    premier:     {asset:'premier-league',    category:'LEAGUE CHAMPIONS',              opening:['Every match.','Every point.','All yours.'], headline:['Champions.'], note:'The title belongs to you.', label:'Premier League', duration:6500, prestige:5},
+    global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:7100, intro:'envelope', prestige:5, figure:true},
+    goldenboot:  {asset:'golden-boot', assetExt:'png',      category:'SCORING HONOUR',                opening:[], headline:['Golden','Boot'],         note:'The season’s most feared finisher.', duration:6500, intro:'envelope', prestige:5},
+    goldenglove: {asset:'goalkeeper-glove', assetExt:'png',  category:'GOALKEEPING HONOUR',            opening:[], headline:['Golden','Glove'],        note:'Goalkeeping excellence, recognised.', duration:6100, intro:'envelope', prestige:4},
+    youth:       {asset:'award',             category:'YOUNG PLAYER HONOUR',           opening:[], headline:['The future.','Now.'],    note:'A breakthrough season recognised.', duration:5700, intro:'envelope-fast', prestige:4},
+    playeraward: {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:[], headline:['A season','apart.'],     note:'Excellence across an entire campaign.', duration:5900, intro:'envelope-fast', prestige:4},
+    worldxi:     {asset:null,                category:'ELITE XI SELECTION',            opening:['Among the elite.','Your place is earned.'], headline:['Selected.'], note:'Your place among the season’s best.', duration:5600, prestige:4, selection:true},
+    continental: {asset:'cup',               category:'CONTINENTAL HONOUR',            opening:['A European campaign.','A lasting reward.'], headline:['Continental','glory.'], note:'A continental chapter written.', duration:4900, prestige:3},
+    international:{asset:'cup',              category:'INTERNATIONAL HONOUR',          opening:['For the nation.','For the moment.'], headline:['International','glory.'], note:'A national-team honour secured.', duration:5000, prestige:3},
+    league:      {asset:'cup',               category:'LEAGUE CHAMPIONS',              opening:['A season of belief.','A place in history.'], headline:['Champions.'], note:'The title belongs to you.', duration:4700, prestige:3},
+    cup:         {asset:'cup',               category:'CUP WINNERS',                   opening:['The final whistle.','The lasting memory.'], headline:['Glory','is yours.'], note:'Another chapter written in silver.', duration:4200, prestige:2},
+    award:       {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:['An outstanding season.'], headline:['Recognised.'], note:'Excellence, recognised.', duration:3900, prestige:1}
   };
+
   function sceneFor(name, type) {
-    if (type === 'award') return /ballon d['’]or/i.test(name) ? 'ballon' : /the best fifa/i.test(name) ? 'global' : 'award';
-    if (/world cup/i.test(name)) return 'world';
-    if (/champions league/i.test(name)) return 'europe';
-    if (/premier league/i.test(name)) return 'premier';
-    if (/la liga|bundesliga|serie a|ligue 1|eredivisie|primeira|league title/i.test(name)) return 'league';
+    const n = String(name || '');
+    if (type === 'award') {
+      if (/ballon d['’]or/i.test(n)) return 'ballon';
+      if (/the best fifa|world player(?: of the year)?/i.test(n)) return 'global';
+      if (/golden boot|golden shoe|european golden shoe|top scorer|gerd m[uü]ller/i.test(n)) return 'goldenboot';
+      if (/golden glove|yashin|goalkeeper of the (?:year|season)|best goalkeeper/i.test(n)) return 'goldenglove';
+      if (/golden boy|young player|kopa/i.test(n)) return 'youth';
+      if (/world xi|world 11|team of the (?:season|year)|toty|tots/i.test(n)) return 'worldxi';
+      if (/player of the (?:season|year)|players[’']? player|supporters[’']? player|footballer of the year|mvp|defender of the|midfielder of the|playmaker/i.test(n)) return 'playeraward';
+      return 'award';
+    }
+    if (/world cup/i.test(n)) return 'world';
+    if (/champions league/i.test(n)) return 'europe';
+    if (/premier league/i.test(n)) return 'premier';
+    if (/europa league|conference league|uefa cup|copa libertadores|copa sudamericana|afc champions|caf champions/i.test(n)) return 'continental';
+    if (/european championship|euros\b|copa am[eé]rica|afcon|africa cup of nations|asian cup|nations league|gold cup/i.test(n)) return 'international';
+    if (/la liga|bundesliga|serie a|ligue 1|eredivisie|primeira|premiership|super lig|superliga|league title|liga mx|mls/i.test(n)) return 'league';
     return 'cup';
   }
+
+  function headlineFor(scene, name) {
+    if (scene === 'goldenboot' && /shoe/i.test(name)) return ['Golden','Shoe'];
+    if (scene === 'goldenglove' && /yashin/i.test(name)) return ['Goalkeeping','excellence.'];
+    return scenes[scene].headline;
+  }
+
+  function envelopeMarkup(winner, title, fast) {
+    return `<div class="flCinemaAnnouncement ${fast ? 'is-fast' : ''}" aria-hidden="true">
+      <div class="flCinemaEnvelope">
+        <div class="flCinemaEnvelopeBack"></div>
+        <div class="flCinemaEnvelopeCard"><span>FOOTBALL LEGACY</span><strong>${escape(winner)}</strong><small>${escape(title)}</small></div>
+        <div class="flCinemaEnvelopeFront"></div>
+        <div class="flCinemaEnvelopeFlap"></div>
+        <i class="flCinemaSeal">FL</i>
+      </div>
+    </div>`;
+  }
+
+  function selectionMarkup(winner, position) {
+    return `<div class="flCinemaSelection" aria-hidden="true">
+      <div class="flCinemaPitch">
+        <i class="flPitchHalf"></i><i class="flPitchCircle"></i><i class="flPitchBox flPitchBoxTop"></i><i class="flPitchBox flPitchBoxBottom"></i>
+      </div>
+      <div class="flCinemaSelectionCard"><span>${escape(position || 'XI')}</span><strong>${escape(winner)}</strong><small>ELITE XI</small></div>
+      <div class="flCinemaSelectionPulse"></div>
+    </div>`;
+  }
+
+  function stageMarkup(assetUrl, figure) {
+    return `<div class="flCinemaStageFx" aria-hidden="true">
+      <div class="flCinemaStageGlow"></div>
+      <div class="flCinemaSpotlights"><i></i><i></i><i></i></div>
+      <div class="flCinemaPedestal"><i></i></div>
+      <div class="flCinemaCameraFlashes"><i></i><i></i><i></i><i></i></div>
+      <div class="flCinemaParticles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      ${assetUrl ? `<span class="flCinemaTrophyGleam" style="--fl-trophy-mask:url('${assetUrl}')"></span>` : ''}
+      ${figure ? `<div class="flCinemaPlayerFigure"><i class="flFigureHead"></i><i class="flFigureBody"></i><i class="flFigureArm flFigureArmLeft"></i><i class="flFigureArm flFigureArmRight"></i></div>` : ''}
+      <div class="flCinemaTunnel"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>`;
+  }
+
   function html({season = {}, player = {}, items = [], type = 'trophy', buttonId = 'flCinemaContinue', buttonLabel = 'Continue', tier = 3}) {
     if (!items.length) return '';
-    const name = String(items[0]), scene = sceneFor(name, type), config = scenes[scene];
+    const name = String(items[0]);
+    const scene = sceneFor(name, type);
+    const config = scenes[scene];
     const winner = player.name || 'Your player';
     const affiliation = scene === 'world' ? (player.nationality || season.club) : season.club;
     const title = config.label || name;
     const extras = items.slice(1);
-    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-duration="${config.duration}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
+    const assetUrl = config.asset ? `${assetBase}${config.asset}.${config.assetExt || 'svg'}` : '';
+    const headlines = headlineFor(scene, name);
+    const intro = config.intro || 'lines';
+    const art = config.selection
+      ? selectionMarkup(winner, player.position)
+      : `<div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetUrl}" alt="" width="400" height="440" decoding="sync" loading="eager"></div>`;
+
+    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${config.duration}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
       <div class="flCinemaAtmosphere" aria-hidden="true"><div class="flCinemaWash"></div><div class="flCinemaHorizon"></div><div class="flCinemaLines"><i></i><i></i><i></i><i></i><i></i></div><div class="flCinemaOrbit"><i></i><i></i><i></i></div><div class="flCinemaStandard flCinemaStandardLeft"></div><div class="flCinemaStandard flCinemaStandardRight"></div></div>
       <header class="flCinemaHeader"><a class="flCinemaBrand" href="index.html" aria-label="Football Legacy home">FL<span>/</span> <b>FOOTBALL LEGACY</b></a><span class="flCinemaEdition">${escape(season.label || 'CAREER HONOURS')}</span></header>
+      ${intro.startsWith('envelope') ? envelopeMarkup(winner, title, intro === 'envelope-fast') : ''}
       <div class="flCinemaIntro" aria-hidden="true"><span class="flCinemaIntroOverline">${escape(title)}</span>${config.opening.map(line => `<span class="flCinemaIntroLine">${escape(line)}</span>`).join('')}<i></i></div>
       <div class="flCinemaComposition">
-        <div class="flCinemaArt" aria-hidden="true"><div class="flCinemaArtRule"></div><div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetBase}${config.asset}.svg" alt="" width="400" height="440" decoding="sync" loading="eager"></div><div class="flCinemaArtCaption">${escape(config.category)}</div></div>
-        <div class="flCinemaCopy"><div class="flCinemaCompetition">${escape(title)}</div><h2 class="flCinemaTitle">${config.headline.map(line => `<span>${escape(line)}</span>`).join('')}</h2><p class="flCinemaNote">${escape(config.note)}</p><div class="flCinemaWinner"><span>${type === 'award' ? 'AWARDED TO' : 'A PLACE IN HISTORY FOR'}</span><strong>${escape(winner)}</strong><div>${escape(affiliation || '')}</div></div>${extras.length ? `<div class="flCinemaExtras">${extras.map(item => `<span>${escape(item)}</span>`).join('')}</div>` : ''}</div>
+        <div class="flCinemaArt" aria-hidden="true">${stageMarkup(assetUrl, config.figure)}<div class="flCinemaArtRule"></div>${art}<div class="flCinemaArtCaption">${escape(config.category)}</div></div>
+        <div class="flCinemaCopy"><div class="flCinemaCompetition">${escape(title)}</div><h2 class="flCinemaTitle">${headlines.map(line => `<span>${escape(line)}</span>`).join('')}</h2><p class="flCinemaNote">${escape(config.note)}</p><div class="flCinemaWinner"><span>${type === 'award' ? 'AWARDED TO' : 'A PLACE IN HISTORY FOR'}</span><strong>${escape(winner)}</strong><div>${escape(affiliation || '')}</div></div>${extras.length ? `<div class="flCinemaExtras">${extras.map(item => `<span>${escape(item)}</span>`).join('')}</div>` : ''}</div>
       </div>
       <footer class="flCinemaFooter"><div class="flCinemaMemento"><i></i><span>YOUR LEGACY, FOREVER.</span></div><button class="primary flCinemaContinue" id="${escape(buttonId)}" disabled>${escape(buttonLabel)} <span aria-hidden="true">→</span></button></footer>
       <button type="button" class="flCinemaSkip" aria-label="Skip animation and show honour">Skip animation <span aria-hidden="true">↗</span></button>
@@ -42,78 +116,142 @@
     </section>`;
   }
 
-  // A controller belongs to one mounted ceremony. Removing it cancels all work;
-  // the host keeps ownership of Continue and multiplayer capture listeners.
   const active = new Map();
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
   function mount(root) {
     if (active.has(root)) return;
-    const animations = [], duration = Number(root.dataset.duration), button = root.querySelector('.flCinemaContinue');
-    const skip = root.querySelector('.flCinemaSkip'), previousFocus = document.activeElement;
+    const animations = [];
+    const duration = Number(root.dataset.duration) || 4500;
+    const button = root.querySelector('.flCinemaContinue');
+    const skip = root.querySelector('.flCinemaSkip');
+    const previousFocus = document.activeElement;
     let finished = false, timer;
-    const animate = (selector, frames, options) => {
+
+    const animate = (selector, frames, options = {}) => {
       root.querySelectorAll(selector).forEach((el, i) => {
-        animations.push(el.animate(frames, {fill:'both',easing:'cubic-bezier(.2,.7,.2,1)',...options,delay:(options.delay || 0) + i * (options.stagger || 0)}));
+        const opts = {...options};
+        const stagger = opts.stagger || 0;
+        delete opts.stagger;
+        animations.push(el.animate(frames, {fill:'both',easing:'cubic-bezier(.2,.7,.2,1)',...opts,delay:(opts.delay || 0) + i * stagger}));
       });
     };
+
     const finish = (focus = true) => {
       if (finished) return;
       const moveFocus = focus && document.activeElement === skip;
-      finished = true; clearTimeout(timer);
+      finished = true;
+      clearTimeout(timer);
       animations.forEach(animation => animation.cancel());
       root.classList.add('is-settled');
       button.disabled = false;
       skip.hidden = true;
       if (moveFocus) button.focus({preventScroll:true});
     };
+
     const keydown = event => {
       if (event.key === 'Escape' && !finished) { event.preventDefault(); finish(); }
       if (event.key === 'Tab') {
         const controls = [skip,button].filter(el => !el.hidden && !el.disabled);
-        if (controls.length) {event.preventDefault(); controls[0].focus({preventScroll:true});}
+        if (controls.length) { event.preventDefault(); controls[0].focus({preventScroll:true}); }
       }
     };
-    const mediaChange = event => {if (event.matches) finish();};
+    const mediaChange = event => { if (event.matches) finish(); };
     const controller = {finish,dispose() {
-      clearTimeout(timer); animations.forEach(animation => animation.cancel());
+      clearTimeout(timer);
+      animations.forEach(animation => animation.cancel());
       reducedMotion.removeEventListener('change', mediaChange);
       root.removeEventListener('keydown', keydown);
       if ((!document.activeElement || document.activeElement === document.body) && previousFocus?.isConnected && !previousFocus.closest('.flCinema')) previousFocus.focus({preventScroll:true});
     }};
+
     active.set(root,controller);
     root.dataset.mounted = 'true';
     root.addEventListener('keydown',keydown);
     skip.addEventListener('click',() => finish());
     reducedMotion.addEventListener('change',mediaChange);
-    if (reducedMotion.matches) {finish(false); root.focus({preventScroll:true}); return;}
+    if (reducedMotion.matches) { finish(false); root.focus({preventScroll:true}); return; }
     root.focus({preventScroll:true});
+
     const scene = root.dataset.scene;
-    const reveal = scene === 'world' ? 3100 : scene === 'premier' || scene === 'ballon' ? 3000 : 2700;
-    animate('.flCinemaIntroOverline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:500,delay:100});
-    animate('.flCinemaIntroLine',[{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'none'}],{duration:850,delay:250,stagger:350});
-    animate('.flCinemaIntro > i',[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:1000,delay:500});
-    animate('.flCinemaIntro',[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-18px)'}],{duration:650,delay:reveal-650});
-    animate('.flCinemaWash',[{opacity:0,transform:'scale(.75)'},{opacity:1,transform:'scale(1)'}],{duration:2300,delay:reveal-400});
-    animate('.flCinemaHorizon',[{opacity:0,transform:'scaleX(.25)'},{opacity:1,transform:'scaleX(1)'}],{duration:1600,delay:reveal+200});
-    animate('.flCinemaStandardLeft',[{opacity:0,transform:'translateY(-105%)'},{opacity:1,transform:'none'}],{duration:1800,delay:reveal-300});
-    animate('.flCinemaStandardRight',[{opacity:0,transform:'translateY(-105%)'},{opacity:1,transform:'none'}],{duration:1800,delay:reveal-100});
-    animate('.flCinemaLines i',[{opacity:0,transform:'scaleY(.05)'},{opacity:1,transform:'scaleY(1)'}],{duration:1900,delay:reveal-350,stagger:110});
-    animate('.flCinemaOrbit',[{opacity:0,transform:'rotate(-25deg) scale(.6)'},{opacity:1,transform:'rotate(0deg) scale(1)'}],{duration:2400,delay:reveal-300});
-    const trophyStart = scene === 'europe' ? 'translateY(62px) scale(.78)' : scene === 'ballon' ? 'translateY(18px) scale(.88) rotate(-9deg)' : scene === 'world' ? 'translateY(75px) scale(.84)' : 'translateY(55px) scale(.9)';
-    animate('.flCinemaTrophyWrap',[{opacity:0,transform:trophyStart,filter:'brightness(.15)'},{opacity:1,transform:'translateY(-5px) scale(1.02)',filter:'brightness(1.25)',offset:.78},{opacity:1,transform:'none',filter:'brightness(1)'}],{duration:2100,delay:reveal-160});
-    animate('.flCinemaArtRule, .flCinemaArtCaption',[{opacity:0},{opacity:1}],{duration:800,delay:reveal+1500});
-    animate('.flCinemaCompetition',[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:600,delay:reveal+600});
-    animate('.flCinemaTitle span',[{opacity:0,transform:'translateY(35px)',filter:'blur(5px)'},{opacity:1,transform:'none',filter:'blur(0px)'}],{duration:1000,delay:reveal+850,stagger:140});
-    animate('.flCinemaNote',[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:700,delay:reveal+1500});
-    animate('.flCinemaWinner, .flCinemaExtras',[{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:850,delay:reveal+1850});
-    animate('.flCinemaMemento',[{opacity:0},{opacity:1}],{duration:650,delay:duration-950});
-    animate('.flCinemaContinue',[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:500,delay:duration-500});
+    const intro = root.dataset.intro;
+    const prestige = Number(root.dataset.prestige) || 1;
+    const reveal = ({ballon:3250,world:3150,europe:2900,premier:2650,global:2850,goldenboot:2850,goldenglove:2700,youth:2450,playeraward:2500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800;
+
+    // Opening: premium individual honours use the requested envelope/name-card reveal.
+    if (intro.startsWith('envelope')) {
+      const fast = intro === 'envelope-fast';
+      const speed = fast ? .82 : 1;
+      animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed),delay:120});
+      animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(28px) scale(.94)'},{opacity:1,transform:'none'}],{duration:Math.round(650*speed),delay:180});
+      animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:Math.round(700*speed),delay:Math.round(720*speed),easing:'cubic-bezier(.3,.05,.2,1)'});
+      animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:Math.round(260*speed),delay:Math.round(700*speed)});
+      animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.18},{transform:'translateY(-48px)',opacity:1,offset:.74},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed),delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
+    } else {
+      animate('.flCinemaIntroOverline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:420,delay:100});
+      animate('.flCinemaIntroLine',[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}],{duration:700,delay:220,stagger:260});
+      animate('.flCinemaIntro > i',[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:780,delay:420});
+      animate('.flCinemaIntro',[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-14px)'}],{duration:520,delay:Math.max(700,reveal-500)});
+    }
+
+    // Atmosphere builds before the object enters, never changing the approved final layout.
+    animate('.flCinemaWash',[{opacity:0,transform:'scale(.82)'},{opacity:1,transform:'scale(1)'}],{duration:1500,delay:Math.max(200,reveal-450)});
+    animate('.flCinemaHorizon',[{opacity:0,transform:'scaleX(.35)'},{opacity:1,transform:'scaleX(1)'}],{duration:1100,delay:reveal+80});
+    animate('.flCinemaStandardLeft',[{opacity:0,transform:'translateY(-100%)'},{opacity:1,transform:'none'}],{duration:1200,delay:reveal-250});
+    animate('.flCinemaStandardRight',[{opacity:0,transform:'translateY(-100%)'},{opacity:1,transform:'none'}],{duration:1200,delay:reveal-100});
+    animate('.flCinemaLines i',[{opacity:0},{opacity:.72},{opacity:.36}],{duration:1500,delay:reveal-350,stagger:90});
+    animate('.flCinemaOrbit',[{opacity:0,transform:'rotate(-18deg) scale(.72)'},{opacity:1,transform:'rotate(0deg) scale(1)'}],{duration:1750,delay:reveal-330});
+    animate('.flCinemaStageGlow',[{opacity:0,transform:'translate(-50%,-50%) scale(.45)'},{opacity:.95,transform:'translate(-50%,-50%) scale(1)'},{opacity:.52,transform:'translate(-50%,-50%) scale(.92)'}],{duration:1300,delay:reveal-200});
+    animate('.flCinemaPedestal',[{opacity:0,transform:'translateX(-50%) scaleX(.45)'},{opacity:1,transform:'translateX(-50%) scaleX(1)'}],{duration:900,delay:reveal});
+    animate('.flCinemaSpotlights i',[{opacity:0,filter:'blur(7px)'},{opacity:prestige >= 5 ? .68 : .42,filter:'blur(1px)'},{opacity:prestige >= 5 ? .42 : .25,filter:'blur(2px)'}],{duration:1300,delay:reveal-80,stagger:110});
+
+    if (scene === 'europe') {
+      animate('.flCinemaTunnel i',[{opacity:0,filter:'blur(7px)'},{opacity:.44,filter:'blur(0)'}],{duration:850,delay:reveal-520,stagger:110});
+    }
+
+    if (scene === 'worldxi') {
+      animate('.flCinemaPitch',[{opacity:0,transform:'scale(.88)'},{opacity:.72,transform:'scale(1)'}],{duration:900,delay:reveal-120});
+      animate('.flCinemaSelectionCard',[{opacity:0,transform:'translate(-50%,72px) scale(.86)'},{opacity:1,transform:'translate(-50%,-14px) scale(1.03)',offset:.72},{opacity:1,transform:'translate(-50%,0) scale(1)'}],{duration:1300,delay:reveal});
+      animate('.flCinemaSelectionPulse',[{opacity:0,transform:'translate(-50%,-50%) scale(.35)'},{opacity:.75,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(1.3)'}],{duration:950,delay:reveal+900});
+    } else {
+      const start = prestige >= 6 ? 'translateY(150px) scale(.76)' : prestige >= 4 ? 'translateY(112px) scale(.84)' : 'translateY(72px) scale(.9)';
+      animate('.flCinemaTrophyWrap',[
+        {opacity:0,transform:start,filter:'brightness(.12) blur(3px)'},
+        {opacity:1,transform:'translateY(-8px) scale(1.035)',filter:'brightness(1.4) blur(0)',offset:.76},
+        {opacity:1,transform:'translateY(0) scale(1)',filter:'brightness(1) blur(0)'}
+      ],{duration:prestige >= 6 ? 1750 : prestige >= 4 ? 1450 : 1100,delay:reveal,easing:'cubic-bezier(.14,.86,.18,1)'});
+      animate('.flCinemaTrophyGleam',[{opacity:0,transform:'translateX(-120%)'},{opacity:.95,offset:.2},{opacity:.7,offset:.7},{opacity:0,transform:'translateX(120%)'}],{duration:prestige >= 5 ? 1050 : 760,delay:reveal+(prestige >= 5 ? 1050 : 760),easing:'ease-in-out'});
+    }
+
+    if (prestige >= 4) {
+      animate('.flCinemaCameraFlashes i',[{opacity:0},{opacity:1,offset:.18},{opacity:0}],{duration:420,delay:reveal+1250,stagger:230,easing:'ease-out'});
+    }
+    if (scene === 'world' || scene === 'premier' || scene === 'europe') {
+      animate('.flCinemaParticles i',[{opacity:0,transform:'translateY(30px) rotate(0deg)'},{opacity:.65,offset:.22},{opacity:0,transform:'translateY(-130px) rotate(120deg)'}],{duration:1700,delay:reveal+1150,stagger:95,easing:'cubic-bezier(.2,.65,.25,1)'});
+    }
+    if (scene === 'ballon' || scene === 'global') {
+      animate('.flCinemaPlayerFigure',[{opacity:0,transform:'translateY(38px) scale(.94)'},{opacity:.42,transform:'translateY(0) scale(1)'}],{duration:1000,delay:reveal+1150});
+    }
+
+    animate('.flCinemaArtRule, .flCinemaArtCaption',[{opacity:0},{opacity:1}],{duration:550,delay:reveal+1150});
+    animate('.flCinemaCompetition',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:500,delay:reveal+520});
+    animate('.flCinemaTitle span',[{opacity:0,transform:'translateY(28px)',filter:'blur(4px)'},{opacity:1,transform:'none',filter:'blur(0)'}],{duration:820,delay:reveal+700,stagger:110});
+    animate('.flCinemaNote',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:560,delay:reveal+1200});
+    animate('.flCinemaWinner, .flCinemaExtras',[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:650,delay:reveal+1450});
+    animate('.flCinemaMemento',[{opacity:0},{opacity:1}],{duration:450,delay:Math.max(reveal+1700,duration-850)});
+    animate('.flCinemaContinue',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:420,delay:duration-480});
     animate('.flCinemaProgress i',[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration,easing:'linear'});
+
     timer = setTimeout(finish,duration);
   }
+
   function sync() {
-    for (const [root, controller] of active) if (!root.isConnected || root.closest('.hidden') || root.closest('#flash:not(.show)')) {controller.dispose(); active.delete(root);}
-    document.querySelectorAll('.flCinema:not([data-mounted])').forEach(root => {if (!root.closest('.hidden') && !root.closest('#flash:not(.show)')) mount(root);});
+    for (const [root, controller] of active) {
+      if (!root.isConnected || root.closest('.hidden') || root.closest('#flash:not(.show)')) { controller.dispose(); active.delete(root); }
+    }
+    document.querySelectorAll('.flCinema:not([data-mounted])').forEach(root => {
+      if (!root.closest('.hidden') && !root.closest('#flash:not(.show)')) mount(root);
+    });
   }
 
   // Original / Express retain their existing flash-close semantics. A delayed
@@ -129,13 +267,13 @@
     } else if (/ WINNERS$/i.test(title)) names = [title.replace(/ WINNERS$/i,'')];
     else if (title === 'SEASON COMPLETE' && season.position === 1) names = [season.league];
     if (!names.length) return false;
-    const entries = names.map(name => ({name,type,season:{...season,club:season.club || state.player.club},player:{name:state.player.name,nationality:state.player.nationality}}));
+    const entries = names.map(name => ({name,type,season:{...season,club:season.club || state.player.club},player:{name:state.player.name,nationality:state.player.nationality,position:state.player.position}}));
     const current = flashQueues.get(card);
-    if (current && host.classList.contains('show') && card.querySelector('.flCinema')) {current.push(...entries); return true;}
+    if (current && host.classList.contains('show') && card.querySelector('.flCinema')) { current.push(...entries); return true; }
     const queue = entries; flashQueues.set(card,queue);
     const next = () => {
       const item = queue.shift();
-      if (!item) {host.classList.remove('show'); flashQueues.delete(card); return;}
+      if (!item) { host.classList.remove('show'); flashQueues.delete(card); return; }
       card.className = 'flashCard flCinemaFlash';
       card.innerHTML = html({season:item.season,player:item.player,items:[item.name],type:item.type,buttonId:'flashClose',buttonLabel:'Continue'});
       host.classList.add('show');
@@ -143,6 +281,7 @@
     };
     next(); return true;
   }
+
   window.FLCinema = Object.freeze({html,sceneFor,showFlash,finish:root => active.get(root)?.finish()});
   new MutationObserver(sync).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',sync,{once:true}); else sync();

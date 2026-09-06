@@ -94,8 +94,8 @@ body[data-mode="story"] .gameHead,body[data-mode="story"] .tabs{background:rgba(
 <script>
 window.flTrack=function(name,options){try{if(typeof window.plausible==='function')window.plausible(name,options||{})}catch(e){}};
 </script>
-<link rel="stylesheet" href="honours-cinema.css?v=92">
-<script src="honours-cinema.js?v=92"></script>
+<link rel="stylesheet" href="honours-cinema.css?v=100">
+<script src="honours-cinema.js?v=100"></script>
 
 </head>
 <body><div class="fl-sitebar" role="navigation" aria-label="Football Legacy website"><a class="fl-sitebrand" href="index.html"><i>FL</i><span>Football Legacy</span></a><nav class="fl-sitenav"><a href="index.html#modes">Modes</a><a href="about.html">About</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="legal.html">Legal</a></nav></div>
@@ -1065,7 +1065,14 @@ function v8CeremonyConfetti(items,type='award'){
  return Math.max(1,...(items||[]).map(x=>v8AwardTier(x,type)));
 }
 function v8PresentationSteps(s){
- const steps=[];for(const type of ['trophy','award']){const source=((type==='trophy'?s.trophies:s.awards)||[]).map(name=>({name,tier:v8AwardTier(name,type)})).sort((a,b)=>a.tier-b.tier);const smaller=source.filter(x=>x.tier<=2).map(x=>x.name);if(smaller.length)steps.push({type,items:smaller,tier:Math.max(...smaller.map(x=>v8AwardTier(x,type)))});for(const item of source.filter(x=>x.tier>=3))steps.push({type,items:[item.name],tier:item.tier})}return steps
+ const steps=[];const bespoke=new Set(['ballon','world','europe','premier','global','goldenboot','goldenglove','youth','playeraward','worldxi']);
+ for(const type of ['trophy','award']){
+  const source=((type==='trophy'?s.trophies:s.awards)||[]).map(name=>({name,tier:v8AwardTier(name,type),scene:window.FLCinema.sceneFor(name,type)})).sort((a,b)=>a.tier-b.tier);
+  const genericMinor=source.filter(x=>x.tier<=2&&!bespoke.has(x.scene)).map(x=>x.name);
+  if(genericMinor.length)steps.push({type,items:genericMinor,tier:Math.max(...genericMinor.map(x=>v8AwardTier(x,type)))});
+  for(const item of source.filter(x=>x.tier>=3||bespoke.has(x.scene)))steps.push({type,items:[item.name],tier:item.tier});
+ }
+ return steps
 }
 function v8SeasonReviewHtml(s,delta){
  const g=seasonGradeInfo(s.avg),trophies=s.trophies||[],awards=s.awards||[],offerCount=state.pendingOffers?.length||0;
