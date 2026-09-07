@@ -1,4 +1,4 @@
-/* Football Legacy honours cinema v102 — presentation only. No career state, RNG, storage or network writes. */
+/* Football Legacy honours cinema v104 — presentation only. No career state, RNG, storage or network writes. */
 (function () {
   'use strict';
 
@@ -61,15 +61,15 @@
   }
 
   const scenes = {
-    ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:9200, intro:'envelope', prestige:7, figure:true},
+    ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:8200, intro:'envelope', prestige:7, figure:true},
     world:       {asset:'world-cup',         category:'WORLD CHAMPIONS',               opening:['For the shirt.','For the nation.','For history.'], headline:['On top of','the world.'], note:'A moment for an entire nation.', label:'World Cup', duration:7900, prestige:7},
     europe:      {asset:'champions-league',  category:'EUROPEAN CHAMPIONS',            opening:['Under the lights.','Above them all.'], headline:['Europe.','Conquered.'], note:'Your name. Among the greats.', label:'Champions League', duration:7500, prestige:6},
     premier:     {asset:'premier-league',    category:'LEAGUE CHAMPIONS',              opening:['Every match.','Every point.','All yours.'], headline:['Champions.'], note:'The title belongs to you.', label:'Premier League', duration:6500, prestige:5},
-    global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:8100, intro:'envelope', prestige:5, figure:true},
-    goldenboot:  {asset:'golden-boot', assetExt:'png',      category:'SCORING HONOUR',                opening:[], headline:['Golden','Boot'],         note:'The season’s most feared finisher.', duration:7500, intro:'envelope', prestige:5},
-    goldenglove: {asset:'goalkeeper-glove', assetExt:'png',  category:'GOALKEEPING HONOUR',            opening:[], headline:['Golden','Glove'],        note:'Goalkeeping excellence, recognised.', duration:7100, intro:'envelope', prestige:4},
-    youth:       {asset:'award',             category:'YOUNG PLAYER HONOUR',           opening:[], headline:['The future.','Now.'],    note:'A breakthrough season recognised.', duration:6700, intro:'envelope-fast', prestige:4},
-    playeraward: {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:[], headline:['A season','apart.'],     note:'Excellence across an entire campaign.', duration:6900, intro:'envelope-fast', prestige:4},
+    global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:7100, intro:'envelope', prestige:5, figure:true},
+    goldenboot:  {asset:'golden-boot', assetExt:'png',      category:'SCORING HONOUR',                opening:[], headline:['Golden','Boot'],         note:'The season’s most feared finisher.', duration:5400, intro:'direct', prestige:5},
+    goldenglove: {asset:'goalkeeper-glove', assetExt:'png',  category:'GOALKEEPING HONOUR',            opening:[], headline:['Golden','Glove'],        note:'Goalkeeping excellence, recognised.', duration:5200, intro:'direct', prestige:4},
+    youth:       {asset:'award',             category:'YOUNG PLAYER HONOUR',           opening:[], headline:['The future.','Now.'],    note:'A breakthrough season recognised.', duration:5700, intro:'envelope-fast', prestige:4},
+    playeraward: {asset:'award',             category:'INDIVIDUAL HONOUR',             opening:[], headline:['A season','apart.'],     note:'Excellence across an entire campaign.', duration:5900, intro:'envelope-fast', prestige:4},
     worldxi:     {asset:null,                category:'ELITE XI SELECTION',            opening:['Among the elite.','Your place is earned.'], headline:['Selected.'], note:'Your place among the season’s best.', duration:5600, prestige:4, selection:true},
     continental: {asset:'cup',               category:'CONTINENTAL HONOUR',            opening:['A European campaign.','A lasting reward.'], headline:['Continental','glory.'], note:'A continental chapter written.', duration:4900, prestige:3},
     international:{asset:'cup',              category:'INTERNATIONAL HONOUR',          opening:['For the nation.','For the moment.'], headline:['International','glory.'], note:'A national-team honour secured.', duration:5000, prestige:3},
@@ -117,6 +117,16 @@
     </div>`;
   }
 
+  function sharedBallonPreludeMarkup(finalists = []) {
+    const names = (Array.isArray(finalists) ? finalists : []).map(x => typeof x === 'string' ? x : x?.careerName || x?.name).filter(Boolean).slice(0,3);
+    return `<div class="flCinemaBallonPrelude" aria-hidden="true">
+      <div class="flCinemaBallonVote"><span>THE FINAL VOTE IS IN</span><strong>One name will leave with football’s greatest individual prize.</strong></div>
+      ${names.length ? `<div class="flCinemaBallonFinalists"><small>FINAL CONTENDERS</small>${names.map((n,i)=>`<div class="flCinemaBallonFinalist" style="--fi:${i}"><i>${escape(n).split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()}</i><b>${escape(n)}</b></div>`).join('')}</div>` : ''}
+      <div class="flCinemaBallonSealLine"><i></i><span>THE ENVELOPE IS SEALED</span><i></i></div>
+    </div>
+    <div class="flCinemaSharedImpact" aria-hidden="true"><i></i><i></i><i></i></div>`;
+  }
+
   function selectionMarkup(winner, position) {
     return `<div class="flCinemaSelection" aria-hidden="true">
       <div class="flCinemaPitch">
@@ -140,7 +150,7 @@
     </div>`;
   }
 
-  function html({season = {}, player = {}, items = [], type = 'trophy', buttonId = 'flCinemaContinue', buttonLabel = 'Continue', tier = 3, sharedBallon = false}) {
+  function html({season = {}, player = {}, items = [], type = 'trophy', buttonId = 'flCinemaContinue', buttonLabel = 'Continue', tier = 3, sharedBallon = false, sharedFinalists = []}) {
     if (!items.length) return '';
     const name = String(items[0]);
     const scene = sceneFor(name, type);
@@ -157,9 +167,10 @@
       ? selectionMarkup(winner, player.position)
       : `<div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetUrl}" alt="" width="400" height="440" decoding="sync" loading="eager"></div>`;
 
-    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 11000 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
+    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 12800 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
       <div class="flCinemaAtmosphere" aria-hidden="true"><div class="flCinemaWash"></div><div class="flCinemaHorizon"></div><div class="flCinemaLines"><i></i><i></i><i></i><i></i><i></i></div><div class="flCinemaOrbit"><i></i><i></i><i></i></div><div class="flCinemaStandard flCinemaStandardLeft"></div><div class="flCinemaStandard flCinemaStandardRight"></div></div>
       <header class="flCinemaHeader"><a class="flCinemaBrand" href="index.html" aria-label="Football Legacy home">FL<span>/</span> <b>FOOTBALL LEGACY</b></a><span class="flCinemaEdition">${escape(season.label || 'CAREER HONOURS')}</span></header>
+      ${isSharedBallon ? sharedBallonPreludeMarkup(sharedFinalists) : ''}
       ${intro.startsWith('envelope') ? envelopeMarkup(winner, title, intro === 'envelope-fast') : ''}
       <div class="flCinemaIntro" aria-hidden="true"><span class="flCinemaIntroOverline">${escape(title)}</span>${config.opening.map(line => `<span class="flCinemaIntroLine">${escape(line)}</span>`).join('')}<i></i></div>
       <div class="flCinemaComposition">
@@ -235,38 +246,64 @@
     const scene = root.dataset.scene;
     const intro = root.dataset.intro;
     const prestige = Number(root.dataset.prestige) || 1;
-    const reveal = sharedBallon ? 5600 : (({ballon:4250,world:3150,europe:2900,premier:2650,global:3850,goldenboot:3850,goldenglove:3700,youth:3450,playeraward:3500,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
+    const reveal = sharedBallon ? 7200 : (({ballon:3150,world:3150,europe:2900,premier:2650,global:2850,goldenboot:650,goldenglove:650,youth:2350,playeraward:2400,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
 
-    // Opening: premium individual honours use the requested envelope/name-card reveal.
+    // Individual-award announcement timing: readable hold, then a quick clean fade.
     if (intro.startsWith('envelope')) {
       const fast = intro === 'envelope-fast';
-      const speed = fast ? .82 : 1, nameHold = 1000;
       if (sharedBallon) {
-        // Multiplayer signature reveal: the winner name never fades. It holds, then the envelope slides off-screen.
+        // Signature multiplayer Ballon d'Or reveal: contenders first, then the sealed envelope.
+        animate('.flCinemaBallonPrelude',[
+          {opacity:0,transform:'translateY(12px)'},
+          {opacity:1,transform:'none',offset:.12},
+          {opacity:1,transform:'none',offset:.82},
+          {opacity:0,transform:'translateY(-10px)'}
+        ],{duration:2450,delay:150,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaBallonVote strong',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:650,delay:420});
+        animate('.flCinemaBallonFinalist',[{opacity:0,transform:'translateY(14px) scale(.97)'},{opacity:1,transform:'none'}],{duration:520,delay:850,stagger:280});
+        animate('.flCinemaBallonSealLine',[{opacity:0,transform:'scaleX(.65)'},{opacity:1,transform:'scaleX(1)'}],{duration:520,delay:1880});
+
         animate('.flCinemaAnnouncement',[
-          {opacity:0,transform:'translateY(18px) scale(.98)'},
+          {opacity:0,transform:'translateY(24px) scale(.97)'},
           {opacity:1,transform:'none',offset:.10},
-          {opacity:1,transform:'none',offset:.84},
-          {opacity:1,transform:'translateY(78vh) scale(.96)'}
-        ],{duration:5450,delay:100,easing:'cubic-bezier(.2,.72,.18,1)'});
-        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:860,delay:240});
-        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:850,delay:1050,easing:'cubic-bezier(.3,.05,.2,1)'});
-        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.14)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:390,delay:1000});
+          {opacity:1,transform:'none',offset:.965},
+          {opacity:0,transform:'translateY(-12px) scale(.985)'}
+        ],{duration:4580,delay:2450,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:820,delay:2660});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:820,delay:3460,easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.16)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:390,delay:3400});
         animate('.flCinemaEnvelopeCard',[
           {transform:'translateY(82px) scale(.98)',opacity:0},
           {transform:'translateY(82px) scale(.98)',opacity:1,offset:.12},
-          {transform:'translateY(-60px) scale(1.035)',opacity:1,offset:.53},
-          {transform:'translateY(-60px) scale(1.035)',opacity:1}
-        ],{duration:1600,delay:1500,easing:'cubic-bezier(.14,.82,.18,1)'});
-        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.9)'},{filter:'brightness(1.12)',offset:.5},{filter:'brightness(1)'}],{duration:1300,delay:3020,easing:'ease-in-out'});
-        audioStop = playSharedBallonDrumRoll(reveal - 160);
+          {transform:'translateY(-60px) scale(1.04)',opacity:1,offset:.48},
+          {transform:'translateY(-60px) scale(1.04)',opacity:1}
+        ],{duration:1650,delay:4050,easing:'cubic-bezier(.14,.82,.18,1)'});
+        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.92)'},{filter:'brightness(1.15)',offset:.55},{filter:'brightness(1)'}],{duration:1600,delay:5300,easing:'ease-in-out'});
+        animate('.flCinemaSharedImpact i',[{opacity:0,transform:'scale(.25)'},{opacity:1,transform:'scale(1)',offset:.22},{opacity:0,transform:'scale(1.55)'}],{duration:760,delay:reveal-80,stagger:70,easing:'ease-out'});
+        audioStop = playSharedBallonDrumRoll(reveal - 180);
       } else {
-        animate('.flCinemaAnnouncement',[{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.78},{opacity:0}],{duration:Math.round(2450*speed)+nameHold,delay:120});
-        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(28px) scale(.94)'},{opacity:1,transform:'none'}],{duration:Math.round(650*speed),delay:180});
-        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:Math.round(700*speed),delay:Math.round(720*speed),easing:'cubic-bezier(.3,.05,.2,1)'});
-        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:Math.round(260*speed),delay:Math.round(700*speed)});
-        animate('.flCinemaEnvelopeCard',[{transform:'translateY(78px)',opacity:0},{transform:'translateY(78px)',opacity:1,offset:.12},{transform:'translateY(-48px)',opacity:1,offset:.48},{transform:'translateY(-48px)',opacity:1,offset:.91},{transform:'translateY(-56px)',opacity:1}],{duration:Math.round(1150*speed)+nameHold,delay:Math.round(950*speed),easing:'cubic-bezier(.16,.8,.2,1)'});
+        const total = fast ? 2180 : 2600;
+        const flapDelay = fast ? 500 : 610;
+        const cardDelay = fast ? 730 : 850;
+        animate('.flCinemaAnnouncement',[
+          {opacity:0},
+          {opacity:1,offset:.10},
+          {opacity:1,offset:.90},
+          {opacity:0}
+        ],{duration:total,delay:90,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(24px) scale(.95)'},{opacity:1,transform:'none'}],{duration:fast?430:520,delay:130});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:fast?520:600,delay:flapDelay,easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-50%) scale(.72)'}],{duration:230,delay:flapDelay});
+        animate('.flCinemaEnvelopeCard',[
+          {transform:'translateY(76px)',opacity:0},
+          {transform:'translateY(76px)',opacity:1,offset:.12},
+          {transform:'translateY(-48px)',opacity:1,offset:.50},
+          {transform:'translateY(-48px)',opacity:1}
+        ],{duration:fast?1120:1300,delay:cardDelay,easing:'cubic-bezier(.16,.8,.2,1)'});
       }
+    } else if (intro === 'direct') {
+      // Known statistical awards (Golden Boot/Glove) go directly to the award itself.
+      root.querySelector('.flCinemaIntro')?.setAttribute('hidden','');
     } else {
       animate('.flCinemaIntroOverline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:420,delay:100});
       animate('.flCinemaIntroLine',[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}],{duration:700,delay:220,stagger:260});

@@ -1,4 +1,4 @@
-/* Football Legacy honours cinema v93. Presentation only; game screens, rarity cards and reviews are untouched. */
+/* Football Legacy honours cinema v104. Presentation only; game screens, rarity cards and reviews are untouched. */
 .modal:has(.flCinema),#flash:has(.flCinema){padding:24px!important;z-index:60000!important;background:#030609!important;backdrop-filter:none!important;overflow:auto}
 .modal:has(.flCinema) .modalCard,#flash:has(.flCinema) .flashCard{width:min(1180px,100%)!important;max-width:none!important;max-height:none!important;padding:0!important;border:1px solid #ffffff13!important;border-radius:8px!important;background:none!important;box-shadow:0 30px 100px #0009!important;overflow:hidden!important;animation:none!important}
 .flCinema{--cinema-accent:#d9c59c;--cinema-rgb:207,180,126;--cinema-bg:#100e17;box-sizing:border-box;position:relative;isolation:isolate;overflow:hidden;color:#f7f5ee;background:var(--cinema-bg);height:min(760px,calc(100dvh - 50px));min-height:610px;padding:30px 48px 26px;text-align:left;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;border-radius:7px;outline:none;transform:translateZ(0);-webkit-font-smoothing:antialiased}
@@ -42,7 +42,7 @@
 
 /* Existing approved opening layout. Envelope scenes replace only this temporary intro, not the final composition. */
 .flCinemaIntro{position:absolute;inset:110px 35px 100px;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;pointer-events:none}
-.flCinema[data-intro^="envelope"] .flCinemaIntro{display:none}
+.flCinema[data-intro^="envelope"] .flCinemaIntro,.flCinema[data-intro="direct"] .flCinemaIntro{display:none}
 .flCinemaIntroOverline{font-size:10px;line-height:1.6;letter-spacing:3px;text-transform:uppercase;color:var(--cinema-accent);margin-bottom:26px;max-width:600px}
 .flCinemaIntroLine{display:block;font-family:Georgia,'Times New Roman',serif;font-size:clamp(30px,4.2vw,58px);line-height:1.16;letter-spacing:-1.8px;color:#f3eee5}
 .flCinemaIntro>i{height:1px;width:75px;margin-top:35px;background:var(--cinema-accent);transform-origin:left}
@@ -196,3 +196,31 @@
 @keyframes flSharedBallonCardShine{0%{transform:translateX(-145%)}100%{transform:translateX(145%)}}
 @media(max-width:640px){.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard strong{font-size:29px}.flCinema[data-shared-ballon="1"] .flCinemaEnvelope:before{inset:-38px}}
 @media(prefers-reduced-motion:reduce){.flCinema[data-shared-ballon="1"] .flCinemaEnvelope:before,.flCinema[data-shared-ballon="1"] .flCinemaEnvelopeCard:after{animation:none!important}}
+
+
+/* V104 — refined envelope timing + multiplayer Ballon d'Or signature spectacle */
+.flCinemaBallonPrelude,.flCinemaSharedImpact{position:absolute;inset:88px 30px 92px;z-index:17;pointer-events:none}
+.flCinemaBallonPrelude{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0}
+.flCinemaBallonVote>span{display:block;font-size:9px;font-weight:900;letter-spacing:3px;color:var(--cinema-accent);margin-bottom:14px}
+.flCinemaBallonVote>strong{display:block;max-width:620px;font:400 clamp(24px,3vw,38px)/1.14 Georgia,'Times New Roman',serif;color:#f7f1e5;letter-spacing:-.7px}
+.flCinemaBallonFinalists{width:min(650px,92%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:27px}
+.flCinemaBallonFinalists>small{grid-column:1/-1;font-size:7px;letter-spacing:2.5px;color:#bfae8d;margin-bottom:2px}
+.flCinemaBallonFinalist{min-width:0;padding:11px 10px;border:1px solid rgba(224,193,138,.2);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(224,193,138,.035));border-radius:6px;box-shadow:0 10px 24px #0005}
+.flCinemaBallonFinalist i{display:grid;width:31px;height:31px;margin:0 auto 7px;place-items:center;border-radius:50%;background:#e0c18a;color:#16110a;font-style:normal;font-size:9px;font-weight:900}
+.flCinemaBallonFinalist b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 14px/1.15 Georgia,'Times New Roman',serif;color:#f4eee3}
+.flCinemaBallonSealLine{width:min(520px,78%);display:flex;align-items:center;gap:11px;margin-top:23px;color:#b9a986;font-size:7px;letter-spacing:2.2px}
+.flCinemaBallonSealLine i{height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(224,193,138,.48))}.flCinemaBallonSealLine i:last-child{transform:scaleX(-1)}
+.flCinemaSharedImpact{z-index:25;display:grid;place-items:center;overflow:hidden}
+.flCinemaSharedImpact i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;border:2px solid rgba(255,234,183,.7);box-shadow:0 0 60px rgba(255,220,124,.4);opacity:0}
+.flCinema[data-shared-ballon="1"]:after{content:'';position:absolute;inset:0;z-index:24;pointer-events:none;background:radial-gradient(circle at 72% 43%,rgba(255,246,210,.45),rgba(255,211,96,.12) 22%,transparent 49%);opacity:0;animation:flV104BallonStagePulse 1.3s 7.1s ease-out both}
+.flCinema[data-shared-ballon="1"] .flCinemaTrophyWrap{width:min(100%,500px)}
+.flCinema[data-shared-ballon="1"] .flCinemaTrophy{filter:drop-shadow(0 36px 34px #0009) drop-shadow(0 0 44px rgba(238,197,94,.32))}
+.flCinema[data-shared-ballon="1"] .flCinemaStageGlow{width:115%;height:62%;background:radial-gradient(ellipse,rgba(255,228,153,.48),rgba(var(--cinema-rgb),.19) 38%,transparent 72%)}
+.flCinema[data-shared-ballon="1"] .flCinemaSpotlights i{background:linear-gradient(180deg,rgba(255,251,227,.62),rgba(224,193,138,.12) 44%,transparent 82%)}
+.flCinema[data-shared-ballon="1"] .flCinemaPlayerFigure{opacity:.55}
+@keyframes flV104BallonStagePulse{0%,15%{opacity:0}32%{opacity:1}100%{opacity:0}}
+@media(max-width:640px){
+  .flCinemaBallonPrelude{inset:82px 16px 108px}.flCinemaBallonVote>strong{font-size:25px;max-width:330px}.flCinemaBallonFinalists{grid-template-columns:1fr;gap:6px;width:min(310px,86%);margin-top:18px}.flCinemaBallonFinalists>small{margin-bottom:0}.flCinemaBallonFinalist{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;text-align:left;padding:7px 9px}.flCinemaBallonFinalist i{margin:0}.flCinemaBallonFinalist b{font-size:13px}.flCinemaBallonSealLine{margin-top:16px;width:min(300px,82%)}
+  .flCinema[data-shared-ballon="1"] .flCinemaTrophyWrap{width:286px}
+}
+@media(prefers-reduced-motion:reduce){.flCinemaBallonPrelude,.flCinemaSharedImpact{display:none!important}.flCinema[data-shared-ballon="1"]:after{animation:none!important;display:none!important}}
