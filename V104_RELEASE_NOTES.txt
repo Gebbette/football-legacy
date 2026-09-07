@@ -1,0 +1,8 @@
+Football Legacy V104 — Ballon d'Or presentation & review update
+
+- Normal envelope scenes are shorter. The name card remains fully clear for the readable portion, then fades rapidly only at the end.
+- Golden Boot and Golden Glove no longer use an envelope because their winners are statistical/known outcomes; they go directly into the award presentation.
+- Shared multiplayer Ballon d'Or has a new final-contenders prelude, sealed-vote stage, longer clear winner-name hold, rapid blackout/fade, expanded drum-roll/impact moment and a larger trophy spotlight reveal.
+- Multiplayer sends the top three contenders to the live reveal in a shuffled, unranked order so the prelude adds suspense without exposing the winner.
+- Quick Story and multiplayer season reviews gain a Ballon d'Or tab only when the player's current ranking is inside the top 100. In multiplayer, the tab explicitly keeps the final vote sealed.
+- No scoring values, career development, transfer logic, room points or Ballon d'Or winner-selection probabilities were changed.

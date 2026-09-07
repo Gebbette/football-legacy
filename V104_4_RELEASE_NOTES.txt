@@ -1,0 +1,19 @@
+FOOTBALL LEGACY V104.4 — BALLON D’OR RANKING RECALIBRATION
+
+Why this update exists
+- V104.3 compressed most qualifying seasons into roughly #70–#80 because the score-to-rank bands were too harsh for the score range the simulator naturally produced.
+
+Changes
+- Recalibrated position-adjusted output targets.
+- Rebalanced match-rating, trophy and individual-award weights.
+- Added a small achievement-combination bonus for title + multiple honours / major trophy + honours.
+- Rebuilt the top-100 mapping so meaningful differences in season quality spread across the full ranking.
+- Removed random rank jitter: stronger achievement scores can no longer randomly appear below clearly weaker scores.
+- Ballon d’Or victory remains difficult and uses a 92.0–95.0 season-dependent world-class threshold.
+- OVR remains completely absent from the Ballon d’Or voting calculation.
+- League trophies are no longer accidentally double-counted when their stored name includes the season label.
+
+Calibration examples (AM, approximately 38 apps)
+- 20 G/A + league title + Playmaker + TOTS + club POTS: typically top-5 to top-15 depending on match rating and exact goal/assist split.
+- 15 G/A + no trophies/awards: generally lower top-100 / fringe top-50 depending on match rating.
+- Elite UCL/World Cup + major individual honours + exceptional rating: podium/winning territory.

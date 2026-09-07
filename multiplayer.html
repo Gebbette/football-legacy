@@ -224,7 +224,7 @@ function generateSeasonMoments(st,s){const res=[];if(s.goals>0)res.push({icon:'�
 function maybeTrophies(st,s){const p=st.player,won=[];if(s.position===1)won.push(s.league);const info=clubInfo(p.club),rep=clubRep(p.club);for(const cup of (info?.cups||[]).slice(0,2)){const tierPenalty=(info?.tier||1)>1?.018:0;const prob=clamp(.018+(rep-55)*.0031+(s.avg-6.7)*.034-tierPenalty,.010,.225);if(chance(st,prob))won.push(cup)}
  const slots=Math.min(4,leagueForClub(p.club).clubs.length),qualified=info?.tier===1&&(st.lastSeason?st.lastSeason.position<=slots:rep>=88);if(qualified){const ucl=clamp(.010+(rep-78)*.0038+(s.avg-6.7)*.022,.006,.115);if(chance(st,ucl))won.push('Champions League')}
  for(const t of won)p.career.trophies.push({year:st.year,name:t,club:p.club});return won}
-function maybeAwards(st,s){const p=st.player,aw=[],contrib=s.goals+s.assists;if(p.age<=21&&s.avg>=7.15&&s.apps>=20&&chance(st,.32))aw.push('Young Player of the Year');if(['ST','WG','AM'].includes(p.position)&&s.goals>=24&&chance(st,.50))aw.push('Golden Boot');if(s.avg>=7.45&&s.apps>=27&&chance(st,.22))aw.push('League Player of the Year');const ballonProb=clamp(.01+Math.max(0,p.rating-88)*.018+Math.max(0,s.avg-7.15)*.16+Math.max(0,contrib-32)*.0025+(s.trophies.includes('Champions League')?.06:0),.005,.24);if(p.rating>=88&&s.avg>=7.1&&chance(st,ballonProb))aw.push("Ballon d'Or");for(const a of aw)p.career.awards.push({year:st.year,name:a,club:p.club});return aw}
+function maybeAwards(st,s){const p=st.player,aw=[],contrib=s.goals+s.assists;if(p.age<=21&&s.avg>=7.15&&s.apps>=20&&chance(st,.32))aw.push('Young Player of the Year');if(['ST','WG','AM'].includes(p.position)&&s.goals>=24&&chance(st,.50))aw.push('Golden Boot');if(s.avg>=7.45&&s.apps>=27&&chance(st,.22))aw.push('League Player of the Year');for(const a of aw)p.career.awards.push({year:st.year,name:a,club:p.club});return aw}
 function internationalSeason(st,s){const p=st.player;let caps=0,goals=0,trophy=null;if(p.rating>=68){const call=clamp(.10+(p.rating-68)*.042+(s.avg-6.7)*.16,0,.92);if(chance(st,call)){caps=rint(st,2,11);goals=Math.max(0,Math.round(caps*POSITION_RATES[p.position].g*.52*(.7+rand(st)*.75)));p.career.caps+=caps;p.career.intGoals+=goals}}
  const endYear=st.year+1,worldCup=endYear>=2030&&endYear%4===2;if(worldCup&&caps>0&&p.rating>=77){const strength=NATIONAL_STRENGTH[p.nationality]||72;const prob=clamp(.004+(strength-70)*.0022+(p.rating-80)*.0015,.002,.085);if(chance(st,prob)){trophy='World Cup';p.career.trophies.push({year:st.year,name:trophy,club:p.nationality})}}return {caps,goals,trophy}}
 function developAttributes(st,delta){const p=st.player;normalizeAttributes(p);const keys=Object.keys(p.attributes),ageFactor=p.age<=23?1:p.age>=32?-.7:.35;for(const k of keys){let move=delta*.62+ageFactor*.15+gaussian(st)*.45;if(delta===0)move*=.35;p.attributes[k]=clamp(Math.round(p.attributes[k]+move),25,99)}
@@ -786,10 +786,7 @@ function awardCandidates(st,s){
  add(`${s.league} Midfielder of the Year`,mid&&s.apps>=25&&s.avg>=7.30,.24,74);
  add(`${s.league} Player of the Year`,s.apps>=27&&s.avg>=7.46,.27,82);
  add('European Player of the Year',p.rating>=88&&s.avg>=7.48&&s.position<=4,.12,91);
- const ballonProb=clamp(.008+Math.max(0,p.rating-89)*.014+Math.max(0,s.avg-7.35)*.12+Math.max(0,contrib-34)*.0018+(s.trophies.includes('Champions League')?.045:0),.004,.18);
- add("Ballon d'Or",p.rating>=89&&s.avg>=7.35,ballonProb,100);
  let selected=out.sort((a,b)=>b.priority-a.priority);
- if(selected.some(x=>x.name==="Ballon d'Or"))selected=selected.filter(x=>x.name!=='European Player of the Year');
  return selected.slice(0,3).map(x=>x.name);
 }
 maybeAwards=function(st,s){
@@ -932,10 +929,9 @@ function addAward(out,name,ok,prob,priority){if(ok&&chance(state,prob))out.push(
 maybeAwards=function(st,s){
  if(st.mode!=='story')return BaseMaybeAwards(st,s);ensureV6(st);const p=st.player,contrib=s.goals+s.assists,attack=['ST','WG','AM'].includes(p.position),mid=['AM','CM','DM'].includes(p.position),def=['CB','FB','DM'].includes(p.position),out=[],add=(n,o,pr,pi)=>{if(o&&chance(st,pr))out.push({name:n,priority:pi})};
  add(`${p.club} Player of the Season`,s.apps>=22&&s.avg>=7.05,.32,35);add(`${p.club} Supporters’ Player of the Season`,s.apps>=24&&s.avg>=7.13,.22,37);add(`${s.league} Young Player of the Season`,p.age<=22&&s.apps>=22&&s.avg>=7.10,.29,52);add('Golden Boy',p.age<=20&&p.rating>=78&&s.avg>=7.25,.12,67);add(`${s.league} Playmaker Award`,mid&&s.assists>=11&&s.avg>=7.08,.34,61);add(`${s.league} Golden Boot`,attack&&s.goals>=20,.48,68);add(`${s.league} Golden Glove`,p.position==='GK'&&s.apps>=27&&s.avg>=7.08&&s.position<=5,.38,68);add(`${s.league} Defender of the Season`,def&&s.apps>=25&&s.avg>=7.28,.25,70);add(`${s.league} Midfielder of the Season`,mid&&s.apps>=25&&s.avg>=7.30,.24,71);add(`${s.league} Player of the Season`,s.apps>=27&&s.avg>=7.44,.26,76);add('UEFA Champions League Player of the Season',s.trophies.includes('Champions League')&&s.avg>=7.45,.26,87);add('European Golden Shoe',attack&&s.goals>=31,.25,90);add('Kopa Trophy',p.age<=20&&p.rating>=84&&s.avg>=7.35,.15,91);add('Yashin Trophy',p.position==='GK'&&p.rating>=88&&s.avg>=7.45,.16,92);add('Gerd Müller Trophy',attack&&s.goals>=38,.18,93);add('FIFPRO Men’s World 11',p.rating>=89&&s.avg>=7.38,.20,94);add('The Best FIFA Men’s Player',p.rating>=91&&s.avg>=7.52,.12,97);
- const ballonProb=clamp(.006+Math.max(0,p.rating-89)*.012+Math.max(0,s.avg-7.38)*.11+Math.max(0,contrib-36)*.0017+(s.trophies.includes('Champions League')?.04:0),.003,.15);add("Ballon d'Or",p.rating>=90&&s.avg>=7.38,ballonProb,100);
  const selected=out.sort((a,b)=>b.priority-a.priority).slice(0,4).map(x=>x.name);for(const name of selected)p.career.awards.push({year:st.year,name,club:p.club});return selected
 };
-function historicSeason(st,s){const p=st.player;if(p.age<20||p.age>33||p.rating<84||s.apps<24||s.avg<6.98)return false;const rarityBoost={common:0,uncommon:.00015,rare:.00045,epic:.0015,legendary:.005,mythic:.014,ungodly:.045}[p.rarity]||0,prob=clamp(.00035+(p.historicProfile||0)+rarityBoost+Math.max(0,s.avg-7.35)*.004,.0002,.075);if(!chance(st,prob))return false;const oldG=s.goals,oldA=s.assists;s.apps=Math.max(s.apps,rint(st,39,47));if(['ST','WG','AM'].includes(p.position)){const target=p.position==='ST'?rint(st,43,61):rint(st,45,68),mix=p.position==='ST'?.64:p.position==='WG'?.52:.42;s.goals=Math.max(s.goals,Math.round(target*mix));s.assists=Math.max(s.assists,target-s.goals)}else if(['CM','FB','DM'].includes(p.position)){const target=rint(st,27,46);s.goals=Math.max(s.goals,Math.round(target*.34));s.assists=Math.max(s.assists,target-s.goals)}s.avg=+Math.max(s.avg,7.94+rand(st)*.72).toFixed(2);p.career.goals+=s.goals-oldG;p.career.assists+=s.assists-oldA;s.historicSeason=true;s.moments??=[];s.moments.unshift({icon:'🌠',title:'A season beyond belief',text:`${s.apps} appearances, ${s.goals} goals and ${s.assists} assists — figures that changed the scale of the career.`});if(p.rating<99){p.rating++;p.peak=Math.max(p.peak,p.rating);p.potential=clamp(Math.max(p.potential,p.rating+(chance(st,.55)?1:0)),p.rating,99);s.ratingChange++;s.endPotential=p.potential}if(p.rating>=89&&!s.awards.includes("Ballon d'Or")&&chance(st,.48)){s.awards.unshift("Ballon d'Or");p.career.awards.push({year:s.year,name:"Ballon d'Or",club:s.club})}return true}
+function historicSeason(st,s){const p=st.player;if(p.age<20||p.age>33||p.rating<84||s.apps<24||s.avg<6.98)return false;const rarityBoost={common:0,uncommon:.00015,rare:.00045,epic:.0015,legendary:.005,mythic:.014,ungodly:.045}[p.rarity]||0,prob=clamp(.00035+(p.historicProfile||0)+rarityBoost+Math.max(0,s.avg-7.35)*.004,.0002,.075);if(!chance(st,prob))return false;const oldG=s.goals,oldA=s.assists;s.apps=Math.max(s.apps,rint(st,39,47));if(['ST','WG','AM'].includes(p.position)){const target=p.position==='ST'?rint(st,43,61):rint(st,45,68),mix=p.position==='ST'?.64:p.position==='WG'?.52:.42;s.goals=Math.max(s.goals,Math.round(target*mix));s.assists=Math.max(s.assists,target-s.goals)}else if(['CM','FB','DM'].includes(p.position)){const target=rint(st,27,46);s.goals=Math.max(s.goals,Math.round(target*.34));s.assists=Math.max(s.assists,target-s.goals)}s.avg=+Math.max(s.avg,7.94+rand(st)*.72).toFixed(2);p.career.goals+=s.goals-oldG;p.career.assists+=s.assists-oldA;s.historicSeason=true;s.moments??=[];s.moments.unshift({icon:'🌠',title:'A season beyond belief',text:`${s.apps} appearances, ${s.goals} goals and ${s.assists} assists — figures that changed the scale of the career.`});if(p.rating<99){p.rating++;p.peak=Math.max(p.peak,p.rating);p.potential=clamp(Math.max(p.potential,p.rating+(chance(st,.55)?1:0)),p.rating,99);s.ratingChange++;s.endPotential=p.potential}return true}
 function recordTargets(club){return {apps:240+hash(club+'-apps')%161,goals:92+hash(club+'-goals')%159,assists:68+hash(club+'-assists')%103}}
 function updateRecords(st,s){const p=st.player,c=p.career;ensureV6(st);const totals=p.clubTotals[s.club]||(p.clubTotals[s.club]={apps:0,goals:0,assists:0});totals.apps+=s.apps;totals.goals+=s.goals;totals.assists+=s.assists;s.recordsBroken=[];const targets=recordTargets(s.club),labels={apps:'appearance record',goals:'goals record',assists:'assist record'};for(const key of Object.keys(targets)){const id=`${s.club}|${key}`;if(totals[key]>=targets[key]&&!c.records.some(x=>x.id===id)){const record={id,year:s.year,club:s.club,type:key,label:labels[key],value:totals[key],target:targets[key]};c.records.push(record);s.recordsBroken.push(record);st.news.unshift({icon:'📜',title:'Club record broken',text:`${p.name} breaks ${s.club}’s ${labels[key]} with ${totals[key]}.`})}}if(s.recordsBroken.length)s.awards.unshift(`CLUB RECORD • ${s.recordsBroken.map(x=>x.label.replace(' record','')).join(' & ')}`)}
 function relaxedOffer(st,s){const p=st.player,current=clubProfile(p.club),perf=seasonPerformanceIndex(st,s),exportLeague=['Denmark','Norway','Sweden','Belgium','Netherlands','Portugal','Austria','Switzerland','Croatia','Serbia','Czechia'].includes(current.country),worthy=s.avg>=6.88&&s.apps>=18||perf>=.48||p.rating>=72;if(!worthy)return [];const roll=clamp(.08+Math.max(0,s.avg-6.75)*.12+Math.max(0,perf)*.035+(exportLeague?.12:0),.08,.42);if(!chance(st,roll))return [];const value=playerMarketValue(st,s),top=current.rep+(perf>=1.5?18:perf>=.7?12:7),pool=ALL_CLUBS.filter(x=>x.club!==p.club&&(!isReserveClub(x.club)||p.age<=22)&&(p.age>=18||x.country===current.country)).filter(x=>{const rep=clubRep(x.club),gap=p.rating-squadLevel(x.club);return rep>=current.rep-10&&rep<=Math.min(98,top)&&gap>=-10&&gap<=14&&clubTransferBudget(x.club,st.year+1)>=value*.68}).map(x=>({...x,score:Math.abs(clubRep(x.club)-(current.rep+Math.max(2,perf*5)))+rand(st)*5})).sort((a,b)=>a.score-b.score);const out=[];for(const x of pool.slice(0,exportLeague&&perf>=.9?2:1)){const budget=clubTransferBudget(x.club,st.year+1),fee=Math.round(Math.min(value*(.88+rand(st)*.18),budget*.88)/100000)*100000,fake={...st,player:{...p,club:x.club}},role=roleAtClub(fake,x.club);out.push({club:x.club,country:x.country,division:x.division,rep:clubRep(x.club),squad:squadLevel(x.club),fee,budget,feePct:Math.round(fee/budget*100),finance:financialLabel(budget),reason:transferInterestReason(st,s,x.club,role),role,fit:transferFitScore(st,x.club),currency:'£'})}return out}
@@ -1025,7 +1021,7 @@ generateOffers=function(st,s,interest=0){
  if(chance(st,clamp(pressure,.06,.98))){const want=(clearlyOutgrown||eliteStranded||perf>=1.05)&&chance(st,.55)?2:1,out=v8TransferFallback(st,s,want);if(out.length){p.v8NoOfferStreak=0;return out}}
  return [];
 };
-function v8Prob(base,s,p,extra=0){return clamp(base+Math.max(0,s.avg-6.9)*.82+Math.max(0,p.rating-78)*.012+extra,.04,.92)}
+function v8Prob(base,s,p,extra=0){return clamp(base+Math.max(0,s.avg-6.9)*.82+extra,.04,.92)}
 maybeAwards=function(st,s){
  if(st.mode!=='story')return V7MaybeAwards(st,s);const p=st.player,contrib=s.goals+s.assists,attack=['ST','WG','AM'].includes(p.position),mid=['AM','CM','DM'].includes(p.position),def=['CB','FB','DM'].includes(p.position),out=[];
  const perf=seasonPerformanceIndex(st,s),ucl=s.trophies.includes('Champions League'),world=s.trophies.includes('World Cup'),champ=s.position===1;
@@ -1034,24 +1030,22 @@ maybeAwards=function(st,s){
  add(`${p.club} Supporters’ Player of the Season`,s.apps>=22&&s.avg>=6.98,v8Prob(.18,s,p,perf*.04),40);
  add(`${s.league} Young Player of the Season`,p.age<=22&&s.apps>=19&&s.avg>=6.88,v8Prob(.30,s,p,p.age<=20?.08:0),60);
  add(`${s.league} Team of the Season`,s.apps>=23&&s.avg>=6.93,v8Prob(.34,s,p,perf*.07),64);
- add('Golden Boy',p.age<=21&&p.rating>=78&&s.apps>=20&&s.avg>=6.98,v8Prob(.12,s,p,.03),72);
+ add('Golden Boy',p.age<=21&&s.apps>=20&&s.avg>=6.98,v8Prob(.12,s,p,.03),72);
  add(`${s.league} Playmaker Award`,mid&&s.assists>=10&&s.avg>=6.93,clamp(.43+(s.assists-10)*.035, .35,.84),70);
  add(`${s.league} Golden Boot`,attack&&s.goals>=18,clamp(.47+(s.goals-18)*.035,.42,.92),78);
  add(`${s.league} Golden Glove`,p.position==='GK'&&s.apps>=25&&s.avg>=6.95&&s.position<=6,v8Prob(.34,s,p,champ?.08:0),78);
  add(`${s.league} Defender of the Season`,def&&s.apps>=24&&s.avg>=7.00,v8Prob(.17,s,p,perf*.07),80);
  add(`${s.league} Midfielder of the Season`,mid&&s.apps>=24&&s.avg>=7.00,v8Prob(.17,s,p,perf*.07),80);
- add(`${s.league} Player of the Season`,s.apps>=26&&s.avg>=7.07&&p.rating>=75,v8Prob(.12,s,p,perf*.10+(champ?.08:0)),84);
+ add(`${s.league} Player of the Season`,s.apps>=26&&s.avg>=7.07,v8Prob(.12,s,p,perf*.10+(champ?.08:0)),84);
  add('UEFA Champions League Player of the Season',ucl&&s.avg>=7.03,v8Prob(.25,s,p,.10),91);
  add('European Golden Shoe',attack&&s.goals>=27,clamp(.28+(s.goals-27)*.04,.25,.86),92);
- add('Kopa Trophy',p.age<=21&&p.rating>=82&&s.avg>=7.01,v8Prob(.14,s,p,.04),93);
- add('Yashin Trophy',p.position==='GK'&&p.rating>=86&&s.avg>=7.03,v8Prob(.13,s,p,.04),94);
+ add('Kopa Trophy',p.age<=21&&s.avg>=7.01,v8Prob(.14,s,p,.04),93);
+ add('Yashin Trophy',p.position==='GK'&&s.avg>=7.03,v8Prob(.13,s,p,.04),94);
  add('Gerd Müller Trophy',attack&&s.goals>=32,clamp(.24+(s.goals-32)*.045,.22,.88),95);
  const worldXIExtra=(ucl?.10:0)+(world?.15:0)+(champ?.05:0)+(contrib>=30?.07:0);
- add('FIFPRO Men’s World 11',p.rating>=86&&s.apps>=25&&s.avg>=7.02,v8Prob(.13,s,p,worldXIExtra),96);
+ add('FIFPRO Men’s World 11',s.apps>=25&&s.avg>=7.02,v8Prob(.13,s,p,worldXIExtra),96);
  const fifaExtra=(ucl?.11:0)+(world?.16:0)+(champ?.05:0)+(contrib>=32?.06:0);
- add('The Best FIFA Men’s Player',p.rating>=88&&s.apps>=25&&s.avg>=7.07,v8Prob(.055,s,p,fifaExtra),98);
- const ballonProb=clamp(.055+Math.max(0,p.rating-86)*.028+Math.max(0,s.avg-7.00)*.42+Math.max(0,contrib-24)*.005+(ucl?.12:0)+(world?.18:0)+(champ?.05:0)+(s.historicSeason?.20:0),.04,.62);
- add("Ballon d'Or",p.rating>=87&&s.apps>=25&&s.avg>=7.03,ballonProb,100);
+ add('The Best FIFA Men’s Player',s.apps>=25&&s.avg>=7.07,v8Prob(.055,s,p,fifaExtra),98);
  const selected=out.sort((a,b)=>b.priority-a.priority).slice(0,5).map(x=>x.name);for(const name of selected)p.career.awards.push({year:st.year,name,club:p.club});return selected;
 };
 function v8Particles(tier){const n=12+tier*10;return `<div class="flV8Particles">${Array.from({length:n},(_,i)=>`<i style="--x:${(i*47)%96+2}%;--y:${(i*61)%78+8}%;--s:${2+(i%4)}px;--d:${1.5+(i%7)*.23}s;--delay:-${(i%9)*.21}s"></i>`).join('')}</div>`}
@@ -1083,15 +1077,58 @@ function v8PresentationSteps(s){
  }
  return steps
 }
+function v104BallonAwardWeight(name,club=''){
+ const n=String(name||'');if(!n||/Ballon d['’]Or/i.test(n))return 0;
+ if(club&&n.startsWith(String(club))&&/Player of the Season|Player of the Year/i.test(n))return 4;
+ if(/The Best FIFA/i.test(n))return 12;
+ if(/Champions League Player of the Season/i.test(n))return 10;
+ if(/FIFPRO.*World 11/i.test(n))return 7;
+ if(/Yashin Trophy|Defender of the Season|Midfielder of the Season/i.test(n))return 7;
+ if(/Player of the Season|Player of the Year/i.test(n))return 7;
+ if(/European Golden Shoe|Gerd Müller Trophy|Golden Boot/i.test(n))return 7;
+ if(/Playmaker Award|Golden Glove/i.test(n))return 5;
+ if(/Team of the Season/i.test(n))return 4;
+ if(/Golden Boy|Kopa Trophy|Young Player/i.test(n))return 3;
+ if(/Supporters|Players['’] Player/i.test(n))return 3;
+ return 2
+}
+function v104BallonTrophyWeight(name,league){
+ const n=String(name||'');if(!n)return 0;
+ if(league&&n.toLowerCase().startsWith(String(league).toLowerCase()))return 0;
+ if(/World Cup/i.test(n))return 18;if(/Champions League/i.test(n))return 15;if(/Europa League/i.test(n))return 8;if(/Conference League/i.test(n))return 5;
+ if(/Cup|Copa|Coppa|Coupe|Pokal|Taça|Taca|KNVB/i.test(n))return 4;return 2
+}
+function v104RankFromScore(score){
+ const pts=[[28,100],[32,92],[36,82],[40,70],[44,58],[48,48],[52,40],[56,33],[60,27],[64,22],[68,18],[72,14],[76,10],[80,7],[84,5],[88,3],[92,2]];
+ if(score<28)return 101+Math.round((28-score)*2);
+ for(let i=0;i<pts.length-1;i++){const [s0,r0]=pts[i],[s1,r1]=pts[i+1];if(score<=s1){const t=(score-s0)/(s1-s0);return Math.round(r0+(r1-r0)*t)}}
+ return 2
+}
+function v104AchievementBallon(st,s){
+ const p=st?.player||{},pos=p.position||'CM',avg=Number(s?.avg||0),apps=Number(s?.apps||s?.stats?.apps||0),goals=Number(s?.goals??s?.stats?.goals??0),assists=Number(s?.assists??s?.stats?.assists??0),cleanSheets=Number(s?.cleanSheets??s?.stats?.cleanSheets??0);
+ const trophies=(s?.trophies||[]).map(x=>String(x?.name||x)),awards=(s?.awards||[]).map(x=>String(x?.name||x)).filter(x=>x&&!/Ballon d['’]Or/i.test(x));
+ const nrm=(v,a,b)=>clamp((v-a)/(b-a),0,1),ratio=(v,t)=>clamp(t>0?v/t:0,0,1.35);
+ const cfg={ST:[28,10,.72,.28,.04],WG:[18,12,.56,.44,.08],AM:[10,14,.38,.62,.10],CM:[6,12,.27,.73,.18],DM:[3,7,.22,.78,.46],FB:[3,9,.25,.75,.46],CB:[2,3,.45,.55,.82],GK:[1,1,0,0,1]}[pos]||[6,12,.27,.73,.18];
+ const [gt,at,gw,aw,defMix]=cfg,pure=pos==='GK'?0:(ratio(goals,gt)*gw+ratio(assists,at)*aw),defLevel=nrm(avg,6.85,7.80),roleIndex=pos==='GK'?defLevel:(pure*(1-defMix)+defLevel*defMix);
+ const ratingPts=clamp((avg-6.65)*30,0,36),rolePts=clamp(roleIndex*30+(pos==='GK'?clamp((cleanSheets-8)/10*4,0,4):0),0,30),champ=Number(s?.position)===1;
+ let trophyPts=champ?10:0;for(const t of trophies)trophyPts+=v104BallonTrophyWeight(t,s?.league);trophyPts=clamp(trophyPts,0,28);
+ let awardPts=0;for(const a of awards)awardPts+=v104BallonAwardWeight(a,p.club||s?.club||'');awardPts=clamp(awardPts,0,26);
+ const availabilityPts=clamp((apps-20)/18*4,0,4),major=trophies.some(x=>/World Cup|Champions League/i.test(x));
+ let distinctionPts=0;if(champ&&awards.length>=2)distinctionPts+=4;if(major&&awards.length)distinctionPts+=4;if(awards.length>=3)distinctionPts+=2;distinctionPts=clamp(distinctionPts,0,8);
+ const score=clamp(ratingPts+rolePts+trophyPts+awardPts+availabilityPts+distinctionPts,0,100);
+ const field=92+(v104RankHash(`${st?.seed||''}|${p.name||''}|${s?.label||s?.year||''}|ballon-field`)%31)/10;
+ let rank=score>=field?1:v104RankFromScore(score);rank=Math.min(160,rank);
+ const won=rank===1,label=won?"Ballon d'Or winner":rank<=3?'Podium contender':rank<=10?'Elite contender':rank<=30?"In the Ballon d'Or conversation":rank<=60?'Strong top-100 season':'Inside the top 100',reasons=[`${Math.round(score)}/100 achievement score`];
+ if(avg>=7.05)reasons.push(`${avg.toFixed(2)} avg rating`);
+ if(pos==='GK')reasons.push('Goalkeeper performance adjusted');else if(['CB','FB','DM'].includes(pos)&&rolePts>=14)reasons.push('Defensive impact adjusted');else if(goals||assists)reasons.push(`${goals} goals • ${assists} assists (${pos}-adjusted)`);
+ const majorName=trophies.find(x=>/World Cup|Champions League/i.test(x));if(majorName)reasons.push(`${majorName} winner`);else if(champ)reasons.push('League champion');
+ const bestAward=awards.slice().sort((a,b)=>v104BallonAwardWeight(b,p.club||s?.club||'')-v104BallonAwardWeight(a,p.club||s?.club||''))[0];if(bestAward)reasons.push(bestAward);
+ return {rank,label,reasons:[...new Set(reasons)].slice(0,4),won,score:+score.toFixed(2),field:+field.toFixed(1)}
+}
+window.FL_BALLON_V1043={evaluate:v104AchievementBallon,calibration:'V104.4'};
 function v104RankHash(v){let h=2166136261>>>0;for(const c of String(v)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function v104BallonRank(s){
- const awards=s.awards||[],won=awards.some(a=>(a?.name||a)==="Ballon d'Or"),ovr=Number(state?.player?.rating||s.startRating||0),avg=Number(s.avg||0),contrib=Number(s.goals||0)+Number(s.assists||0),ucl=(s.trophies||[]).some(x=>/Champions League/i.test(x)),world=(s.trophies||[]).some(x=>/World Cup/i.test(x)),champ=Number(s.position)===1,historic=!!s.historicSeason;
- const score=ovr*1.75+avg*18+contrib*.82+(ucl?16:0)+(world?22:0)+(champ?5:0)+(historic?18:0);
- const jitter=(v104RankHash(`${state?.player?.name||''}|${s.label}|ballon-rank`)%7)-3;
- let rank=won?1:Math.round(101-(score-285)*1.25+jitter);rank=Math.max(1,Math.min(160,rank));if(rank>100)return null;
- const label=rank<=3?'Podium contender':rank<=10?'Elite contender':rank<=30?"In the Ballon d'Or conversation":rank<=60?'Strong top-100 season':'Inside the top 100';
- const reasons=[];if(ovr>=88)reasons.push(`${ovr} OVR`);if(avg>=7.2)reasons.push(`${avg.toFixed(2)} avg`);if(contrib>=20)reasons.push(`${contrib} G+A`);if(ucl)reasons.push('Champions League winner');if(world)reasons.push('World Cup winner');if(champ)reasons.push('League champion');
- return {rank,label,reasons:reasons.slice(0,4),won};
+ const result=v104AchievementBallon(state,s);if(!result||result.rank>100)return null;return result
 }
 function v8SeasonReviewHtml(s,delta){
  const g=seasonGradeInfo(s.avg),trophies=Array.isArray(s.trophies)?s.trophies:[],awards=Array.isArray(s.awards)?s.awards:[],offerCount=state.pendingOffers?.length||0,ballon=v104BallonRank(s);
@@ -1100,7 +1137,7 @@ function v8SeasonReviewHtml(s,delta){
  const actions=`<div class="flV104ReviewActions"><button class="primary quickMainAction" id="seasonContinue">Back to Play Career</button></div>`;
  if(!ballon)return `<div class="flV8SeasonReview">${seasonPanel}${actions}</div>`;
  const sealed=!ballon.won&&location.pathname.toLowerCase().includes('multiplayer');
- const rankPanel=`<div class="flV104BallonPanel flV104ReviewPane" data-fl-review-pane="ballon" hidden><div class="flV104BallonTop"><span>BALLON D’OR • TOP 100</span><strong>#${ballon.rank}</strong><b>${esc(ballon.label)}</b><p>${sealed?'This is your current Ballon d’Or ranking. The final vote remains sealed until the live party ceremony.':ballon.won?'You finished the season at No. 1 and won the Ballon d’Or.':'Your season has put you inside the Ballon d’Or top 100.'}</p></div><div class="flV104BallonReasons">${ballon.reasons.length?ballon.reasons.map(x=>`<span>${esc(x)}</span>`).join(''):'<span>Season performance</span>'}</div><div class="flV104BallonScale"><i style="left:${((ballon.rank-1)/99*100).toFixed(2)}%"></i><small><b>1</b><span>WORLD RANKING</span><b>100</b></small></div></div>`;
+ const rankPanel=`<div class="flV104BallonPanel flV104ReviewPane" data-fl-review-pane="ballon" hidden><div class="flV104BallonTop"><span>BALLON D’OR • TOP 100</span><strong>#${ballon.rank}</strong><b>${esc(ballon.label)}</b><p>${sealed?'This is your current Ballon d’Or ranking. The final vote remains sealed until the live party ceremony.':ballon.won?'You finished the season at No. 1 and won the Ballon d’Or.':'Your season has put you inside the Ballon d’Or top 100.'} <em style="display:block;margin-top:7px;font-style:normal;color:#819289">Achievement-only ranking: match rating, position-adjusted output, trophies and individual honours. OVR is not used.</em></p></div><div class="flV104BallonReasons">${ballon.reasons.length?ballon.reasons.map(x=>`<span>${esc(x)}</span>`).join(''):'<span>Season performance</span>'}</div><div class="flV104BallonScale"><i style="left:${((ballon.rank-1)/99*100).toFixed(2)}%"></i><small><b>1</b><span>WORLD RANKING</span><b>100</b></small></div></div>`;
  return `<div class="flV8SeasonReview flV104TabbedReview"><div class="flV104ReviewTabs"><div class="flV104ReviewTabBar" role="tablist" aria-label="Season review sections"><button type="button" class="flV104ReviewTab is-active" data-fl-review-tab="season" role="tab" aria-selected="true">Season Review</button><button type="button" class="flV104ReviewTab" data-fl-review-tab="ballon" role="tab" aria-selected="false">Ballon d’Or <span>#${ballon.rank}</span></button></div>${seasonPanel}${rankPanel}</div>${actions}</div>`;
 };
 function v104SetReviewTab(root,target){
@@ -1279,13 +1316,7 @@ const isMultiplayerPage=/multiplayer\.html$/i.test(location.pathname);
 function v9HasAward(s,name){return (s.awards||[]).includes(name)}
 function v9AddAward(st,s,name){if(v9HasAward(s,name))return false;s.awards??=[];s.awards.push(name);st.player.career.awards??=[];st.player.career.awards.push({year:s.year,name,club:s.club});return true}
 function v9EliteAwardChance(st,s,ovr){const p=st.player,contrib=(s.goals||0)+(s.assists||0),major=(s.trophies||[]).some(x=>/Champions League|World Cup/i.test(x));let q={world11:0,best:0,ballon:0};if(ovr>=95){q.world11=.38+(ovr-95)*.14;q.best=.12+(ovr-95)*.17;q.ballon=.10+(ovr-95)*.195}if(major){q.best+=.08;q.ballon+=.08}if(s.avg>=7.45){q.world11+=.08;q.best+=.08;q.ballon+=.10}if(contrib>=35){q.best+=.05;q.ballon+=.06}return {world11:clamp(q.world11,0,.98),best:clamp(q.best,0,.92),ballon:clamp(q.ballon,0,.96)}}
-maybeAwards=function(st,s){
- const out=V9BaseAwards(st,s)||[];if(st.mode!=='story')return out;const p=st.player,ovr=Number(s.startRating||p.rating||0);if(ovr<95)return out;const q=v9EliteAwardChance(st,s,ovr);
- if(!v9HasAward(s,'FIFPRO Men’s World 11')&&chance(st,q.world11)){v9AddAward(st,s,'FIFPRO Men’s World 11');out.push('FIFPRO Men’s World 11')}
- if(!v9HasAward(s,'The Best FIFA Men’s Player')&&chance(st,q.best)){v9AddAward(st,s,'The Best FIFA Men’s Player');out.push('The Best FIFA Men’s Player')}
- if(!v9HasAward(s,"Ballon d'Or")&&chance(st,q.ballon)){v9AddAward(st,s,"Ballon d'Or");out.push("Ballon d'Or")}
- const unique=[...new Set(out)];const priority=["Ballon d'Or",'The Best FIFA Men’s Player','FIFPRO Men’s World 11'];return [...priority.filter(x=>unique.includes(x)),...unique.filter(x=>!priority.includes(x))].slice(0,6)
-};
+maybeAwards=function(st,s){return V9BaseAwards(st,s)||[]};
 function v9EliteFloor(st,s){
  if(st.mode!=='story'||!s)return s;const p=st.player,ovr=Number(s.startRating||p.rating||0);if(ovr<94)return s;const oldG=s.goals||0,oldA=s.assists||0,oldPos=s.position||99;
  const power=ovr-94,avgFloor=7.08+power*.085;s.avg=+Math.max(s.avg,Math.min(8.18,avgFloor+rand(st)*.10)).toFixed(2);
@@ -1309,4 +1340,24 @@ window.FL_QUICK_V9={v9EliteAwardChance,v9EliteFloor,v9TransferOffer};
 })();
 </script>
 
+
+<script id="flV1043AchievementBallonFinalizer">
+(function(){
+'use strict';
+const V1043BaseSimulate=simulateSeason;
+function isBallonName(x){return /^Ballon d['’]Or$/i.test(String(x?.name||x||''))}
+function stripSeasonBallon(st,s){
+ s.awards=(s.awards||[]).filter(x=>!isBallonName(x));
+ const c=st?.player?.career;if(!c?.awards)return;
+ c.awards=c.awards.filter(x=>!(isBallonName(x)&&typeof x==='object'&&Number(x.year)===Number(s.year)));
+}
+function finalizeAchievementBallon(st,s){
+ if(!s||st?.mode!=='story'||!window.FL_BALLON_V1043)return s;stripSeasonBallon(st,s);const result=window.FL_BALLON_V1043.evaluate(st,s);s.ballonAchievementScore=result.score;s.ballonWorldRank=result.rank;
+ if(result.won){s.awards.unshift("Ballon d'Or");st.player.career.awards.push({year:s.year,name:"Ballon d'Or",club:s.club});st.news?.unshift({icon:'🌕',title:"Ballon d'Or winner",text:`${st.player.name} wins the Ballon d'Or on the strength of a ${Math.round(result.score)}/100 achievement season.`})}
+ return s
+}
+simulateSeason=function(st,choice=null){return finalizeAchievementBallon(st,V1043BaseSimulate(st,choice))};
+window.FL_BALLON_V1043.finalize=finalizeAchievementBallon;
+})();
+</script>
 </body></html>
