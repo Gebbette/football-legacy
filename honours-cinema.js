@@ -63,6 +63,7 @@
   const scenes = {
     ballon:      {asset:'ballon-dor',       category:'THE HIGHEST INDIVIDUAL HONOUR', opening:[], headline:['Ballon','d’Or'],          note:'Football’s greatest individual distinction.', label:'Ballon d’Or', duration:8200, intro:'envelope', prestige:7, figure:true},
     world:       {asset:'world-cup',         category:'WORLD CHAMPIONS',               opening:['For the shirt.','For the nation.','For history.'], headline:['On top of','the world.'], note:'A moment for an entire nation.', label:'World Cup', duration:7900, prestige:7},
+    euros:       {asset:'euros',             category:'CHAMPIONS OF EUROPE',           opening:['A continent watching.','One nation standing.'], headline:['Kings of','Europe.'], note:'European champions. A summer that lasts forever.', label:'European Championship', duration:7600, prestige:6},
     europe:      {asset:'champions-league',  category:'EUROPEAN CHAMPIONS',            opening:['Under the lights.','Above them all.'], headline:['Europe.','Conquered.'], note:'Your name. Among the greats.', label:'Champions League', duration:7500, prestige:6},
     premier:     {asset:'premier-league',    category:'LEAGUE CHAMPIONS',              opening:['Every match.','Every point.','All yours.'], headline:['Champions.'], note:'The title belongs to you.', label:'Premier League', duration:6500, prestige:5},
     global:      {asset:'global',            category:'THE WORLD’S BEST',              opening:[], headline:['The Best.'],            note:'An exceptional season. A global honour.', duration:7100, intro:'envelope', prestige:5, figure:true},
@@ -91,10 +92,11 @@
       return 'award';
     }
     if (/world cup/i.test(n)) return 'world';
+    if (/european championship|uefa euro|euros\b/i.test(n)) return 'euros';
     if (/champions league/i.test(n)) return 'europe';
     if (/premier league/i.test(n)) return 'premier';
     if (/europa league|conference league|uefa cup|copa libertadores|copa sudamericana|afc champions|caf champions/i.test(n)) return 'continental';
-    if (/european championship|euros\b|copa am[eé]rica|afcon|africa cup of nations|asian cup|nations league|gold cup/i.test(n)) return 'international';
+    if (/copa am[eé]rica|afcon|africa cup of nations|asian cup|nations league|gold cup/i.test(n)) return 'international';
     if (/la liga|bundesliga|serie a|ligue 1|eredivisie|primeira|premiership|super lig|superliga|league title|liga mx|mls/i.test(n)) return 'league';
     return 'cup';
   }
@@ -145,7 +147,7 @@
       <div class="flCinemaCameraFlashes"><i></i><i></i><i></i><i></i></div>
       <div class="flCinemaParticles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       ${assetUrl ? `<span class="flCinemaTrophyGleam" style="--fl-trophy-mask:url('${assetUrl}')"></span>` : ''}
-      ${figure ? `<div class="flCinemaPlayerFigure"><i class="flFigureHead"></i><i class="flFigureBody"></i><i class="flFigureArm flFigureArmLeft"></i><i class="flFigureArm flFigureArmRight"></i></div>` : ''}
+      ${figure ? `<div class="flCinemaPlayerFigure"><div class="flFigureAura"></div><div class="flFigureHead"><i class="flFigureHair"></i><i class="flFigureFaceLight"></i></div><i class="flFigureNeck"></i><div class="flFigureSuit"><i class="flFigureShirt"></i><i class="flFigureTie"></i><i class="flFigureLapel flFigureLapelLeft"></i><i class="flFigureLapel flFigureLapelRight"></i><i class="flFigurePocket"></i></div><i class="flFigureArm flFigureArmLeft"></i><i class="flFigureArm flFigureArmRight"></i><i class="flFigureHand"></i><div class="flFigureBase"></div></div>` : ''}
       <div class="flCinemaTunnel"><i></i><i></i><i></i><i></i><i></i></div>
     </div>`;
   }
@@ -157,7 +159,7 @@
     const config = scenes[scene];
     const isSharedBallon = !!sharedBallon && scene === 'ballon';
     const winner = player.name || 'Your player';
-    const affiliation = scene === 'world' ? (player.nationality || season.club) : season.club;
+    const affiliation = (scene === 'world' || scene === 'euros') ? (player.nationality || season.club) : season.club;
     const title = config.label || name;
     const extras = items.slice(1);
     const assetUrl = config.asset ? `${assetBase}${config.asset}.${config.assetExt || 'svg'}` : '';
@@ -343,7 +345,7 @@
     if (prestige >= 4) {
       animate('.flCinemaCameraFlashes i',[{opacity:0},{opacity:1,offset:.18},{opacity:0}],{duration:420,delay:reveal+1250,stagger:230,easing:'ease-out'});
     }
-    if (scene === 'world' || scene === 'premier' || scene === 'europe') {
+    if (scene === 'world' || scene === 'premier' || scene === 'europe' || scene === 'euros') {
       animate('.flCinemaParticles i',[{opacity:0,transform:'translateY(30px) rotate(0deg)'},{opacity:.65,offset:.22},{opacity:0,transform:'translateY(-130px) rotate(120deg)'}],{duration:1700,delay:reveal+1150,stagger:95,easing:'cubic-bezier(.2,.65,.25,1)'});
     }
     if (scene === 'ballon' || scene === 'global') {

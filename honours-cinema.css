@@ -5,6 +5,7 @@
 .flCinema *{box-sizing:border-box;text-shadow:none!important}
 .flCinema[data-scene="premier"]{--cinema-bg:#140b24;--cinema-accent:#e6d0a0;--cinema-rgb:146,76,222}
 .flCinema[data-scene="europe"]{--cinema-bg:#061326;--cinema-accent:#b3d7ff;--cinema-rgb:59,133,230}
+.flCinema[data-scene="euros"]{--cinema-bg:#071525;--cinema-accent:#e4edf5;--cinema-rgb:82,145,205}
 .flCinema[data-scene="world"]{--cinema-bg:#061c19;--cinema-accent:#e8cf96;--cinema-rgb:57,150,123}
 .flCinema[data-scene="ballon"]{--cinema-bg:#100e0b;--cinema-accent:#e0c18a;--cinema-rgb:164,121,47}
 .flCinema[data-scene="global"]{--cinema-bg:#0e1020;--cinema-accent:#ced6ff;--cinema-rgb:117,123,223}
@@ -34,7 +35,7 @@
 .flCinemaLines{position:absolute;inset:0;display:none;opacity:.5}
 .flCinemaLines i{position:absolute;width:1px;top:-15%;height:112%;background:linear-gradient(transparent,rgba(var(--cinema-rgb),.5),transparent);transform-origin:50% 50%;opacity:0}
 .flCinemaLines i:nth-child(1){left:51%;rotate:26deg}.flCinemaLines i:nth-child(2){left:62%;rotate:13deg}.flCinemaLines i:nth-child(3){left:73%;rotate:0deg}.flCinemaLines i:nth-child(4){left:84%;rotate:-13deg}.flCinemaLines i:nth-child(5){left:95%;rotate:-26deg}
-.flCinema[data-scene="europe"] .flCinemaLines,.flCinema[data-scene="ballon"] .flCinemaLines,.flCinema[data-scene="global"] .flCinemaLines,.flCinema[data-scene="goldenboot"] .flCinemaLines,.flCinema[data-scene="goldenglove"] .flCinemaLines,.flCinema[data-scene="playeraward"] .flCinemaLines{display:block}
+.flCinema[data-scene="europe"] .flCinemaLines,.flCinema[data-scene="euros"] .flCinemaLines,.flCinema[data-scene="ballon"] .flCinemaLines,.flCinema[data-scene="global"] .flCinemaLines,.flCinema[data-scene="goldenboot"] .flCinemaLines,.flCinema[data-scene="goldenglove"] .flCinemaLines,.flCinema[data-scene="playeraward"] .flCinemaLines{display:block}
 .flCinema[data-scene="ballon"] .flCinemaLines i{rotate:0deg;opacity:.3}
 .flCinemaOrbit{position:absolute;width:620px;height:620px;left:calc(73% - 310px);top:calc(46% - 310px);border:1px solid rgba(var(--cinema-rgb),.3);border-radius:50%;display:none;opacity:0}
 .flCinemaOrbit i{position:absolute;inset:10%;border:1px solid rgba(var(--cinema-rgb),.2);border-radius:50%}.flCinemaOrbit i:nth-child(2){inset:0 28%}.flCinemaOrbit i:nth-child(3){inset:28% 0}
@@ -87,15 +88,27 @@
 .flCinemaParticles i{position:absolute;width:3px;height:15px;background:linear-gradient(var(--cinema-accent),#fff8);border-radius:4px;opacity:0}
 .flCinemaParticles i:nth-child(1){left:8%;bottom:3%;rotate:18deg}.flCinemaParticles i:nth-child(2){left:19%;bottom:8%;rotate:-25deg}.flCinemaParticles i:nth-child(3){left:31%;bottom:1%;rotate:31deg}.flCinemaParticles i:nth-child(4){left:44%;bottom:10%;rotate:-12deg}.flCinemaParticles i:nth-child(5){right:42%;bottom:2%;rotate:23deg}.flCinemaParticles i:nth-child(6){right:28%;bottom:9%;rotate:-32deg}.flCinemaParticles i:nth-child(7){right:16%;bottom:1%;rotate:13deg}.flCinemaParticles i:nth-child(8){right:5%;bottom:7%;rotate:-20deg}
 .flCinemaTunnel{display:none;position:absolute;inset:8% 7% 16%;perspective:700px;z-index:-2}
-.flCinema[data-scene="europe"] .flCinemaTunnel{display:block}
+.flCinema[data-scene="europe"] .flCinemaTunnel,.flCinema[data-scene="euros"] .flCinemaTunnel{display:block}
 .flCinemaTunnel i{position:absolute;left:50%;top:46%;width:84%;height:72%;transform:translate(-50%,-50%) scale(var(--t));border:1px solid rgba(var(--cinema-rgb),.22);border-radius:48% 48% 12% 12%;opacity:0}
 .flCinemaTunnel i:nth-child(1){--t:1}.flCinemaTunnel i:nth-child(2){--t:.8}.flCinemaTunnel i:nth-child(3){--t:.62}.flCinemaTunnel i:nth-child(4){--t:.46}.flCinemaTunnel i:nth-child(5){--t:.32}
 
-/* Optional, understated player figure only for the two biggest individual presentation types. */
-.flCinemaPlayerFigure{position:absolute;z-index:2;right:3%;bottom:13%;width:110px;height:250px;opacity:0;filter:drop-shadow(0 20px 18px #0009)}
-.flCinemaPlayerFigure i{display:block;position:absolute;background:linear-gradient(145deg,rgba(245,239,221,.38),rgba(123,111,88,.12));border:1px solid rgba(255,255,255,.11)}
-.flFigureHead{width:42px;height:42px;border-radius:50%;left:34px;top:0}.flFigureBody{width:76px;height:155px;left:17px;top:47px;border-radius:38px 38px 18px 18px;clip-path:polygon(17% 0,83% 0,100% 32%,79% 100%,21% 100%,0 32%)}
-.flFigureArm{width:26px;height:110px;top:62px;border-radius:18px}.flFigureArmLeft{left:1px;rotate:8deg}.flFigureArmRight{right:1px;rotate:-16deg;transform-origin:50% 15%}
+/* Premium winner silhouette for the biggest individual presentations. Deliberately editorial rather than uncanny. */
+.flCinemaPlayerFigure{position:absolute;z-index:3;right:2.2%;bottom:10%;width:142px;height:286px;opacity:0;filter:drop-shadow(0 26px 24px #000b);transform-origin:bottom center}
+.flFigureAura{position:absolute;inset:0 -34px -8px;background:radial-gradient(ellipse at 52% 43%,rgba(255,239,196,.14),transparent 52%);filter:blur(2px)}
+.flFigureHead{position:absolute;left:47px;top:6px;width:48px;height:57px;border-radius:48% 48% 44% 44% / 43% 43% 55% 55%;background:linear-gradient(115deg,#5a4735 0 16%,#b88b63 17% 54%,#7f5b42 72%,#3b2b23 100%);box-shadow:inset 8px 0 12px rgba(255,232,205,.13),inset -8px -3px 12px rgba(0,0,0,.38),0 4px 10px #0007;border:1px solid rgba(255,241,214,.15);overflow:hidden}
+.flFigureHair{position:absolute;left:-3px;right:-3px;top:-4px;height:22px;border-radius:60% 60% 35% 35%;background:linear-gradient(145deg,#181614,#382c24 55%,#151311);clip-path:polygon(0 0,100% 0,96% 70%,78% 54%,66% 76%,48% 55%,30% 72%,10% 58%)}
+.flFigureFaceLight{position:absolute;left:9px;top:18px;width:14px;height:27px;border-radius:50%;background:linear-gradient(90deg,rgba(255,229,194,.2),transparent);filter:blur(1px)}
+.flFigureNeck{position:absolute;left:59px;top:55px;width:25px;height:27px;border-radius:5px 5px 10px 10px;background:linear-gradient(100deg,#8d654a,#b88762 48%,#5f4535);border:0!important}
+.flFigureSuit{position:absolute;left:25px;top:74px;width:94px;height:169px;border-radius:39px 39px 16px 16px;background:linear-gradient(106deg,#090b10 0 17%,#202631 43%,#0c1017 72%,#05070b 100%);clip-path:polygon(19% 0,81% 0,100% 27%,88% 100%,12% 100%,0 27%);box-shadow:inset 14px 0 18px rgba(255,255,255,.035),inset -12px 0 16px #0008,0 14px 24px #0008;border:1px solid rgba(255,255,255,.09)}
+.flFigureShirt{position:absolute!important;left:34px;top:0;width:27px;height:75px;background:linear-gradient(#f6f1e8,#bcb8b1)!important;clip-path:polygon(0 0,100% 0,77% 100%,23% 100%);border:0!important}
+.flFigureTie{position:absolute!important;left:43px;top:12px;width:9px;height:59px;background:linear-gradient(#b89b54,#6e5626)!important;clip-path:polygon(50% 0,100% 15%,72% 100%,28% 100%,0 15%);border:0!important}
+.flFigureLapel{position:absolute!important;top:1px;width:34px;height:79px;background:linear-gradient(145deg,#2e3541,#11161e)!important;border:0!important;filter:drop-shadow(0 2px 1px #0006)}
+.flFigureLapelLeft{left:7px;clip-path:polygon(0 0,100% 11%,64% 42%,91% 100%,12% 55%)}.flFigureLapelRight{right:7px;clip-path:polygon(100% 0,0 11%,36% 42%,9% 100%,88% 55%)}
+.flFigurePocket{position:absolute!important;right:14px;top:70px;width:18px;height:3px;background:#c8a95d!important;box-shadow:0 0 8px rgba(220,187,96,.28);border:0!important}
+.flFigureArm{position:absolute;top:86px;width:31px;height:128px;border-radius:22px;background:linear-gradient(100deg,#090c11,#202630 58%,#07090d);border:1px solid rgba(255,255,255,.07);box-shadow:inset 6px 0 9px rgba(255,255,255,.025)}.flFigureArmLeft{left:8px;rotate:8deg}.flFigureArmRight{right:4px;rotate:-22deg;transform-origin:50% 12%}
+.flFigureHand{position:absolute;right:1px;top:194px;width:26px;height:31px;border-radius:45% 50% 48% 45%;rotate:-19deg;background:linear-gradient(115deg,#a67857,#674938);border:1px solid rgba(255,230,200,.09)}
+.flFigureBase{position:absolute;left:20px;right:7px;bottom:6px;height:16px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.78),transparent 70%);filter:blur(3px)}
+.flCinema[data-scene="ballon"] .flCinemaPlayerFigure,.flCinema[data-scene="global"] .flCinemaPlayerFigure{mix-blend-mode:normal}
 
 /* World XI / Team of the Season: a selection card and pitch, not a trophy. */
 .flCinemaSelection{position:relative;width:min(92%,410px);height:390px;z-index:5;display:flex;align-items:center;justify-content:center}
@@ -166,7 +179,7 @@
   .flCinemaLines{inset:-5% -25% 48% -25%}.flCinemaLines i:nth-child(1){left:10%}.flCinemaLines i:nth-child(2){left:30%}.flCinemaLines i:nth-child(3){left:50%}.flCinemaLines i:nth-child(4){left:70%}.flCinemaLines i:nth-child(5){left:90%}
   .flCinemaOrbit{width:350px;height:350px;left:calc(50% - 175px);top:75px}.flCinemaExtras{justify-content:center}
   .flCinemaStageFx{inset:1% 0 7%}.flCinemaStageGlow{width:90%;top:70%}.flCinemaPedestal{bottom:7%;width:72%}.flCinemaSpotlights{inset:-18% -15% 5%}
-  .flCinemaPlayerFigure{right:4%;bottom:8%;width:82px;height:196px;transform:scale(.82);transform-origin:bottom right}.flFigureHead{left:25px;width:34px;height:34px}.flFigureBody{left:12px;top:39px;width:60px;height:123px}.flFigureArm{top:50px;width:21px;height:88px}
+  .flCinemaPlayerFigure{right:-3%;bottom:7%;width:142px;height:286px;transform:scale(.70);transform-origin:bottom right}
   .flCinemaSelection{height:292px;width:100%}.flCinemaPitch{inset:18px 28px}.flCinemaSelectionCard{top:68px;width:150px;min-height:180px;padding:22px 14px 18px}.flCinemaSelectionCard span{width:39px;height:39px;margin-bottom:22px}.flCinemaSelectionCard strong{font-size:20px}.flCinemaSelectionPulse{width:190px;height:190px}
   .flCinemaCameraFlashes i{width:64px;height:64px}
 }
