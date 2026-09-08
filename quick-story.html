@@ -94,8 +94,8 @@ body[data-mode="story"] .gameHead,body[data-mode="story"] .tabs{background:rgba(
 <script>
 window.flTrack=function(name,options){try{if(typeof window.plausible==='function')window.plausible(name,options||{})}catch(e){}};
 </script>
-<link rel="stylesheet" href="honours-cinema.css?v=1045">
-<script src="honours-cinema.js?v=1045"></script>
+<link rel="stylesheet" href="honours-cinema.css?v=1046">
+<script src="honours-cinema.js?v=1046"></script>
 
 
 <style id="flV102TransferStack">
@@ -893,7 +893,7 @@ playSeasonUI=function(choice){
 
 function ensureTopActions(){const top=document.querySelector('.topActions');if(!top||document.getElementById('quickTutorialBtn'))return;top.insertAdjacentHTML('afterbegin','<button class="quickTutorialBtn" id="quickTutorialBtn" type="button">? Tutorial</button><a class="quickTopLink" href="index.html#modes">Modes</a>');document.getElementById('quickTutorialBtn').onclick=()=>{document.getElementById('flHowTo')?.click();setTimeout(()=>document.getElementById('flStartTour')?.click(),30)};const settings=document.getElementById('settingsBtn');if(settings)settings.onclick=()=>{settingsModal();const close=document.getElementById('closeSettings');if(close)close.onclick=()=>{closeModal();returnToPlay()}}}
 document.addEventListener('click',e=>{if(e.target.closest?.('#flDone'))setTimeout(returnToPlay,40)},true);
-document.getElementById('modal')?.addEventListener('click',e=>{if(document.body.classList.contains('quick-award-open')&&e.target.id==='modal'){e.stopImmediatePropagation()}},true);
+document.getElementById('modal')?.addEventListener('click',e=>{if(e.target?.id==='modal'){e.preventDefault();e.stopImmediatePropagation()}},true);
 ensureTopActions();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureTopActions);
 window.FL_QUICK_V5={returnToPlay,acceptQuick,rejectQuick,quickVerdict,awardCandidates,importantSeasons};

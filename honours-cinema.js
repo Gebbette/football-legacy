@@ -147,7 +147,7 @@
       <div class="flCinemaCameraFlashes"><i></i><i></i><i></i><i></i></div>
       <div class="flCinemaParticles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       ${assetUrl ? `<span class="flCinemaTrophyGleam" style="--fl-trophy-mask:url('${assetUrl}')"></span>` : ''}
-      ${figure ? `<div class="flCinemaPlayerFigure"><div class="flFigureAura"></div><div class="flFigureHead"><i class="flFigureHair"></i><i class="flFigureFaceLight"></i></div><i class="flFigureNeck"></i><div class="flFigureSuit"><i class="flFigureShirt"></i><i class="flFigureTie"></i><i class="flFigureLapel flFigureLapelLeft"></i><i class="flFigureLapel flFigureLapelRight"></i><i class="flFigurePocket"></i></div><i class="flFigureArm flFigureArmLeft"></i><i class="flFigureArm flFigureArmRight"></i><i class="flFigureHand"></i><div class="flFigureBase"></div></div>` : ''}
+      ${figure ? `<div class="flCinemaPlayerFigure"><svg class="flFigureEditorial" viewBox="0 0 220 330" role="img" aria-label="Illustration of the award winner in a suit holding the Ballon d'Or"><ellipse class="flDrawShadow" cx="110" cy="316" rx="77" ry="10"/><path class="flDrawJacket" d="M39 307V169c0-31 22-53 54-58l17 9 17-9c32 5 54 27 54 58v138H39Z"/><path class="flDrawShirt" d="M88 115h44l-8 94H96l-8-94Z"/><path class="flDrawLapel" d="M91 114 64 133l27 59 16-38-16-40Zm38 0 27 19-27 59-16-38 16-40Z"/><path class="flDrawTie" d="m110 126 10 13-5 14 8 54-13 16-13-16 8-54-5-14 10-13Z"/><rect class="flDrawNeck" x="96" y="85" width="28" height="35" rx="8"/><circle class="flDrawHead" cx="110" cy="61" r="38"/><path class="flDrawHair" d="M75 57c1-27 17-42 38-42 22 0 37 13 39 36-10-5-17-12-24-21-13 12-29 18-53 17Z"/><path class="flDrawFaceLine" d="M92 62h8m20 0h8M103 79c5 4 10 4 15 0"/><path class="flDrawArmLine" d="M68 157C76 179 80 204 94 225M152 157c-8 22-12 47-26 68"/><g class="flDrawTrophy"><path class="flDrawTrophyBase" d="M93 262h34l5 13H88l5-13Zm6-15h22v18H99v-18Z"/><circle class="flDrawTrophyBall" cx="110" cy="218" r="31"/><path class="flDrawTrophyFacet" d="m110 190 15 11-6 17-18 1-7-17 16-12Zm-9 29 9 27 9-28m-25-16 7 17-16 9m40-27-6 17 16 10"/></g><ellipse class="flDrawHand" cx="88" cy="225" rx="11" ry="8" transform="rotate(24 88 225)"/><ellipse class="flDrawHand" cx="132" cy="225" rx="11" ry="8" transform="rotate(-24 132 225)"/></svg></div>` : ''}
       <div class="flCinemaTunnel"><i></i><i></i><i></i><i></i><i></i></div>
     </div>`;
   }
@@ -169,7 +169,7 @@
       ? selectionMarkup(winner, player.position)
       : `<div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetUrl}" alt="" width="400" height="440" decoding="sync" loading="eager"></div>`;
 
-    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 12800 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
+    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 16000 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
       <div class="flCinemaAtmosphere" aria-hidden="true"><div class="flCinemaWash"></div><div class="flCinemaHorizon"></div><div class="flCinemaLines"><i></i><i></i><i></i><i></i><i></i></div><div class="flCinemaOrbit"><i></i><i></i><i></i></div><div class="flCinemaStandard flCinemaStandardLeft"></div><div class="flCinemaStandard flCinemaStandardRight"></div></div>
       <header class="flCinemaHeader"><a class="flCinemaBrand" href="index.html" aria-label="Football Legacy home">FL<span>/</span> <b>FOOTBALL LEGACY</b></a><span class="flCinemaEdition">${escape(season.label || 'CAREER HONOURS')}</span></header>
       ${isSharedBallon ? sharedBallonPreludeMarkup(sharedFinalists) : ''}
@@ -248,7 +248,7 @@
     const scene = root.dataset.scene;
     const intro = root.dataset.intro;
     const prestige = Number(root.dataset.prestige) || 1;
-    const reveal = sharedBallon ? 7200 : (({ballon:3150,world:3150,europe:2900,premier:2650,global:2850,goldenboot:650,goldenglove:650,youth:2350,playeraward:2400,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
+    const reveal = sharedBallon ? 9800 : (({ballon:3150,world:3150,europe:2900,premier:2650,global:2850,goldenboot:650,goldenglove:650,youth:2350,playeraward:2400,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
 
     // Individual-award announcement timing: readable hold, then a quick clean fade.
     if (intro.startsWith('envelope')) {
@@ -260,7 +260,7 @@
           {opacity:1,transform:'none',offset:.12},
           {opacity:1,transform:'none',offset:.82},
           {opacity:0,transform:'translateY(-10px)'}
-        ],{duration:2450,delay:150,easing:'cubic-bezier(.2,.72,.18,1)'});
+        ],{duration:3000,delay:150,easing:'cubic-bezier(.2,.72,.18,1)'});
         animate('.flCinemaBallonVote strong',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:650,delay:420});
         animate('.flCinemaBallonFinalist',[{opacity:0,transform:'translateY(14px) scale(.97)'},{opacity:1,transform:'none'}],{duration:520,delay:850,stagger:280});
         animate('.flCinemaBallonSealLine',[{opacity:0,transform:'scaleX(.65)'},{opacity:1,transform:'scaleX(1)'}],{duration:520,delay:1880});
@@ -270,17 +270,17 @@
           {opacity:1,transform:'none',offset:.10},
           {opacity:1,transform:'none',offset:.965},
           {opacity:0,transform:'translateY(-12px) scale(.985)'}
-        ],{duration:4580,delay:2450,easing:'cubic-bezier(.2,.72,.18,1)'});
-        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:820,delay:2660});
-        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:820,delay:3460,easing:'cubic-bezier(.3,.05,.2,1)'});
-        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.16)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:390,delay:3400});
+        ],{duration:6500,delay:2800,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:900,delay:3000});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:900,delay:4100,easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.16)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:430,delay:4040});
         animate('.flCinemaEnvelopeCard',[
           {transform:'translateY(82px) scale(.98)',opacity:0},
           {transform:'translateY(82px) scale(.98)',opacity:1,offset:.12},
           {transform:'translateY(-60px) scale(1.04)',opacity:1,offset:.48},
           {transform:'translateY(-60px) scale(1.04)',opacity:1}
-        ],{duration:1650,delay:4050,easing:'cubic-bezier(.14,.82,.18,1)'});
-        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.92)'},{filter:'brightness(1.15)',offset:.55},{filter:'brightness(1)'}],{duration:1600,delay:5300,easing:'ease-in-out'});
+        ],{duration:1900,delay:4750,easing:'cubic-bezier(.14,.82,.18,1)'});
+        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.92)'},{filter:'brightness(1.15)',offset:.55},{filter:'brightness(1)'}],{duration:3200,delay:6100,easing:'ease-in-out'});
         animate('.flCinemaSharedImpact i',[{opacity:0,transform:'scale(.25)'},{opacity:1,transform:'scale(1)',offset:.22},{opacity:0,transform:'scale(1.55)'}],{duration:760,delay:reveal-80,stagger:70,easing:'ease-out'});
         audioStop = playSharedBallonDrumRoll(reveal - 180);
       } else {

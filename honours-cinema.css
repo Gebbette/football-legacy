@@ -92,22 +92,21 @@
 .flCinemaTunnel i{position:absolute;left:50%;top:46%;width:84%;height:72%;transform:translate(-50%,-50%) scale(var(--t));border:1px solid rgba(var(--cinema-rgb),.22);border-radius:48% 48% 12% 12%;opacity:0}
 .flCinemaTunnel i:nth-child(1){--t:1}.flCinemaTunnel i:nth-child(2){--t:.8}.flCinemaTunnel i:nth-child(3){--t:.62}.flCinemaTunnel i:nth-child(4){--t:.46}.flCinemaTunnel i:nth-child(5){--t:.32}
 
-/* Premium winner silhouette for the biggest individual presentations. Deliberately editorial rather than uncanny. */
-.flCinemaPlayerFigure{position:absolute;z-index:3;right:2.2%;bottom:10%;width:142px;height:286px;opacity:0;filter:drop-shadow(0 26px 24px #000b);transform-origin:bottom center}
-.flFigureAura{position:absolute;inset:0 -34px -8px;background:radial-gradient(ellipse at 52% 43%,rgba(255,239,196,.14),transparent 52%);filter:blur(2px)}
-.flFigureHead{position:absolute;left:47px;top:6px;width:48px;height:57px;border-radius:48% 48% 44% 44% / 43% 43% 55% 55%;background:linear-gradient(115deg,#5a4735 0 16%,#b88b63 17% 54%,#7f5b42 72%,#3b2b23 100%);box-shadow:inset 8px 0 12px rgba(255,232,205,.13),inset -8px -3px 12px rgba(0,0,0,.38),0 4px 10px #0007;border:1px solid rgba(255,241,214,.15);overflow:hidden}
-.flFigureHair{position:absolute;left:-3px;right:-3px;top:-4px;height:22px;border-radius:60% 60% 35% 35%;background:linear-gradient(145deg,#181614,#382c24 55%,#151311);clip-path:polygon(0 0,100% 0,96% 70%,78% 54%,66% 76%,48% 55%,30% 72%,10% 58%)}
-.flFigureFaceLight{position:absolute;left:9px;top:18px;width:14px;height:27px;border-radius:50%;background:linear-gradient(90deg,rgba(255,229,194,.2),transparent);filter:blur(1px)}
-.flFigureNeck{position:absolute;left:59px;top:55px;width:25px;height:27px;border-radius:5px 5px 10px 10px;background:linear-gradient(100deg,#8d654a,#b88762 48%,#5f4535);border:0!important}
-.flFigureSuit{position:absolute;left:25px;top:74px;width:94px;height:169px;border-radius:39px 39px 16px 16px;background:linear-gradient(106deg,#090b10 0 17%,#202631 43%,#0c1017 72%,#05070b 100%);clip-path:polygon(19% 0,81% 0,100% 27%,88% 100%,12% 100%,0 27%);box-shadow:inset 14px 0 18px rgba(255,255,255,.035),inset -12px 0 16px #0008,0 14px 24px #0008;border:1px solid rgba(255,255,255,.09)}
-.flFigureShirt{position:absolute!important;left:34px;top:0;width:27px;height:75px;background:linear-gradient(#f6f1e8,#bcb8b1)!important;clip-path:polygon(0 0,100% 0,77% 100%,23% 100%);border:0!important}
-.flFigureTie{position:absolute!important;left:43px;top:12px;width:9px;height:59px;background:linear-gradient(#b89b54,#6e5626)!important;clip-path:polygon(50% 0,100% 15%,72% 100%,28% 100%,0 15%);border:0!important}
-.flFigureLapel{position:absolute!important;top:1px;width:34px;height:79px;background:linear-gradient(145deg,#2e3541,#11161e)!important;border:0!important;filter:drop-shadow(0 2px 1px #0006)}
-.flFigureLapelLeft{left:7px;clip-path:polygon(0 0,100% 11%,64% 42%,91% 100%,12% 55%)}.flFigureLapelRight{right:7px;clip-path:polygon(100% 0,0 11%,36% 42%,9% 100%,88% 55%)}
-.flFigurePocket{position:absolute!important;right:14px;top:70px;width:18px;height:3px;background:#c8a95d!important;box-shadow:0 0 8px rgba(220,187,96,.28);border:0!important}
-.flFigureArm{position:absolute;top:86px;width:31px;height:128px;border-radius:22px;background:linear-gradient(100deg,#090c11,#202630 58%,#07090d);border:1px solid rgba(255,255,255,.07);box-shadow:inset 6px 0 9px rgba(255,255,255,.025)}.flFigureArmLeft{left:8px;rotate:8deg}.flFigureArmRight{right:4px;rotate:-22deg;transform-origin:50% 12%}
-.flFigureHand{position:absolute;right:1px;top:194px;width:26px;height:31px;border-radius:45% 50% 48% 45%;rotate:-19deg;background:linear-gradient(115deg,#a67857,#674938);border:1px solid rgba(255,230,200,.09)}
-.flFigureBase{position:absolute;left:20px;right:7px;bottom:6px;height:16px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.78),transparent 70%);filter:blur(3px)}
+/* V104.6 — clean editorial award winner. Flat vector illustration, intentionally not pseudo-3D. */
+.flCinemaPlayerFigure{position:absolute;z-index:3;right:1.5%;bottom:7%;width:190px;height:304px;opacity:0;filter:drop-shadow(0 24px 18px rgba(0,0,0,.48));transform-origin:bottom center}
+.flFigureEditorial{display:block;width:100%;height:100%;overflow:visible}
+.flDrawShadow{fill:rgba(0,0,0,.42)}
+.flDrawJacket{fill:#111722;stroke:#65717d;stroke-width:2;stroke-linejoin:round}
+.flDrawShirt{fill:#f1eee6;stroke:#c7c2b7;stroke-width:1.5}
+.flDrawLapel{fill:#202936;stroke:#7a8590;stroke-width:1.4;stroke-linejoin:round}
+.flDrawTie{fill:#c5a250;stroke:#e3c56f;stroke-width:1}
+.flDrawNeck,.flDrawHead,.flDrawHand{fill:#b8815e;stroke:#7a513b;stroke-width:2}
+.flDrawHair{fill:#202020;stroke:#0e0f10;stroke-width:2;stroke-linejoin:round}
+.flDrawFaceLine{fill:none;stroke:#72503c;stroke-width:2.1;stroke-linecap:round}
+.flDrawArmLine{fill:none;stroke:#111722;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke}.flDrawArmLine{filter:drop-shadow(0 0 0 #65717d)}
+.flDrawTrophyBase{fill:#b78b2d;stroke:#f0d16e;stroke-width:2;stroke-linejoin:round}
+.flDrawTrophyBall{fill:#d8ad44;stroke:#ffe192;stroke-width:3}
+.flDrawTrophyFacet{fill:none;stroke:#f7da82;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
 .flCinema[data-scene="ballon"] .flCinemaPlayerFigure,.flCinema[data-scene="global"] .flCinemaPlayerFigure{mix-blend-mode:normal}
 
 /* World XI / Team of the Season: a selection card and pitch, not a trophy. */
@@ -149,7 +148,7 @@
 .flCinema.is-settled .flCinemaStageGlow{opacity:.28;transform:translate(-50%,-50%) scale(.92)}
 .flCinema.is-settled .flCinemaPedestal{opacity:.62;transform:translateX(-50%) scaleX(1)}
 .flCinema.is-settled .flCinemaSpotlights i{opacity:.15}
-.flCinema.is-settled .flCinemaPlayerFigure{opacity:.28;transform:none}
+.flCinema.is-settled .flCinemaPlayerFigure{opacity:.82;transform:none}
 .flCinema.is-settled .flCinemaSelectionCard{transform:translate(-50%,0)}
 
 @media(max-width:760px){
@@ -179,7 +178,7 @@
   .flCinemaLines{inset:-5% -25% 48% -25%}.flCinemaLines i:nth-child(1){left:10%}.flCinemaLines i:nth-child(2){left:30%}.flCinemaLines i:nth-child(3){left:50%}.flCinemaLines i:nth-child(4){left:70%}.flCinemaLines i:nth-child(5){left:90%}
   .flCinemaOrbit{width:350px;height:350px;left:calc(50% - 175px);top:75px}.flCinemaExtras{justify-content:center}
   .flCinemaStageFx{inset:1% 0 7%}.flCinemaStageGlow{width:90%;top:70%}.flCinemaPedestal{bottom:7%;width:72%}.flCinemaSpotlights{inset:-18% -15% 5%}
-  .flCinemaPlayerFigure{right:-3%;bottom:7%;width:142px;height:286px;transform:scale(.70);transform-origin:bottom right}
+  .flCinemaPlayerFigure{right:-4%;bottom:5%;width:174px;height:282px;transform:scale(.78);transform-origin:bottom right}
   .flCinemaSelection{height:292px;width:100%}.flCinemaPitch{inset:18px 28px}.flCinemaSelectionCard{top:68px;width:150px;min-height:180px;padding:22px 14px 18px}.flCinemaSelectionCard span{width:39px;height:39px;margin-bottom:22px}.flCinemaSelectionCard strong{font-size:20px}.flCinemaSelectionPulse{width:190px;height:190px}
   .flCinemaCameraFlashes i{width:64px;height:64px}
 }
@@ -191,7 +190,7 @@
   .flCinemaIntro,.flCinemaAnnouncement,.flCinemaProgress,.flCinemaSkip{display:none!important}
   .flCinema :is(.flCinemaTrophyWrap,.flCinemaCompetition,.flCinemaTitle>span,.flCinemaNote,.flCinemaWinner,.flCinemaExtras,.flCinemaMemento,.flCinemaContinue,.flCinemaWash,.flCinemaHorizon,.flCinemaArtRule,.flCinemaArtCaption,.flCinemaStandard,.flCinemaOrbit,.flCinemaLines i,.flCinemaSelectionCard,.flCinemaPitch){opacity:1!important;transform:none!important;filter:none!important}
   .flCinema .flCinemaTrophyWrap{display:flex!important;align-items:center!important;justify-content:center!important}.flCinema .flCinemaTrophy{object-fit:contain!important;object-position:center center!important}
-  .flCinemaStageGlow{opacity:.28!important;transform:translate(-50%,-50%) scale(.92)!important}.flCinemaPedestal{opacity:.62!important;transform:translateX(-50%) scaleX(1)!important}.flCinemaSpotlights i{opacity:.12!important}.flCinemaPlayerFigure{opacity:.25!important;transform:none!important}.flCinemaSelectionCard{transform:translate(-50%,0)!important}
+  .flCinemaStageGlow{opacity:.28!important;transform:translate(-50%,-50%) scale(.92)!important}.flCinemaPedestal{opacity:.62!important;transform:translateX(-50%) scaleX(1)!important}.flCinemaSpotlights i{opacity:.12!important}.flCinemaPlayerFigure{opacity:.78!important;transform:none!important}.flCinemaSelectionCard{transform:translate(-50%,0)!important}
 }
 
 
@@ -225,12 +224,12 @@
 .flCinemaBallonSealLine i{height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(224,193,138,.48))}.flCinemaBallonSealLine i:last-child{transform:scaleX(-1)}
 .flCinemaSharedImpact{z-index:25;display:grid;place-items:center;overflow:hidden}
 .flCinemaSharedImpact i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;border:2px solid rgba(255,234,183,.7);box-shadow:0 0 60px rgba(255,220,124,.4);opacity:0}
-.flCinema[data-shared-ballon="1"]:after{content:'';position:absolute;inset:0;z-index:24;pointer-events:none;background:radial-gradient(circle at 72% 43%,rgba(255,246,210,.45),rgba(255,211,96,.12) 22%,transparent 49%);opacity:0;animation:flV104BallonStagePulse 1.3s 7.1s ease-out both}
+.flCinema[data-shared-ballon="1"]:after{content:'';position:absolute;inset:0;z-index:24;pointer-events:none;background:radial-gradient(circle at 72% 43%,rgba(255,246,210,.45),rgba(255,211,96,.12) 22%,transparent 49%);opacity:0;animation:flV104BallonStagePulse 1.3s 9.7s ease-out both}
 .flCinema[data-shared-ballon="1"] .flCinemaTrophyWrap{width:min(100%,500px)}
 .flCinema[data-shared-ballon="1"] .flCinemaTrophy{filter:drop-shadow(0 36px 34px #0009) drop-shadow(0 0 44px rgba(238,197,94,.32))}
 .flCinema[data-shared-ballon="1"] .flCinemaStageGlow{width:115%;height:62%;background:radial-gradient(ellipse,rgba(255,228,153,.48),rgba(var(--cinema-rgb),.19) 38%,transparent 72%)}
 .flCinema[data-shared-ballon="1"] .flCinemaSpotlights i{background:linear-gradient(180deg,rgba(255,251,227,.62),rgba(224,193,138,.12) 44%,transparent 82%)}
-.flCinema[data-shared-ballon="1"] .flCinemaPlayerFigure{opacity:.55}
+.flCinema[data-shared-ballon="1"] .flCinemaPlayerFigure{opacity:.92}
 @keyframes flV104BallonStagePulse{0%,15%{opacity:0}32%{opacity:1}100%{opacity:0}}
 @media(max-width:640px){
   .flCinemaBallonPrelude{inset:82px 16px 108px}.flCinemaBallonVote>strong{font-size:25px;max-width:330px}.flCinemaBallonFinalists{grid-template-columns:1fr;gap:6px;width:min(310px,86%);margin-top:18px}.flCinemaBallonFinalists>small{margin-bottom:0}.flCinemaBallonFinalist{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;text-align:left;padding:7px 9px}.flCinemaBallonFinalist i{margin:0}.flCinemaBallonFinalist b{font-size:13px}.flCinemaBallonSealLine{margin-top:16px;width:min(300px,82%)}
