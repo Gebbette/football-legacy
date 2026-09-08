@@ -1,1 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420" role="img" aria-label="European championship trophy"><defs><linearGradient id="s" x1="0" x2="1"><stop stop-color="#7b8793"/><stop offset=".28" stop-color="#eef3f6"/><stop offset=".52" stop-color="#aeb9c2"/><stop offset=".78" stop-color="#f8fbfd"/><stop offset="1" stop-color="#68737d"/></linearGradient><radialGradient id="g"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#9bb8d4" stop-opacity="0"/></radialGradient></defs><ellipse cx="160" cy="389" rx="88" ry="16" fill="#000" opacity=".24"/><path d="M112 42h96l-9 42 25 35-18 170c-3 31-18 55-46 67-28-12-43-36-46-67L96 119l25-35z" fill="url(#s)" stroke="#fff" stroke-opacity=".4" stroke-width="3"/><path d="M104 117c-33 2-50 19-49 49 1 38 22 62 61 74l-5-38c-18-10-26-23-27-39-1-11 5-18 20-20zm112 0c33 2 50 19 49 49-1 38-22 62-61 74l5-38c18-10 26-23 27-39 1-11-5-18-20-20z" fill="none" stroke="url(#s)" stroke-width="20" stroke-linecap="round"/><path d="M126 84h68" stroke="#5d6a76" stroke-opacity=".55" stroke-width="4"/><ellipse cx="160" cy="75" rx="41" ry="17" fill="#dfe7ec" stroke="#fff" stroke-opacity=".55" stroke-width="3"/><path d="M139 351h42v27h42v20H97v-20h42z" fill="url(#s)"/><path d="M116 395h88" stroke="#fff" stroke-opacity=".34" stroke-width="3"/><circle cx="137" cy="128" r="66" fill="url(#g)" opacity=".2"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 440" role="img" aria-label="European Championship trophy">
+  <defs>
+    <linearGradient id="silver" x1="0" x2="1">
+      <stop offset="0" stop-color="#64707a"/><stop offset=".18" stop-color="#bdc6cd"/><stop offset=".34" stop-color="#fbfdff"/><stop offset=".52" stop-color="#a6b0b8"/><stop offset=".70" stop-color="#f8fafb"/><stop offset=".86" stop-color="#929ca5"/><stop offset="1" stop-color="#5d6871"/>
+    </linearGradient>
+    <linearGradient id="darkSilver" x1="0" x2="1"><stop stop-color="#66727c"/><stop offset=".48" stop-color="#e5eaed"/><stop offset="1" stop-color="#626d77"/></linearGradient>
+    <radialGradient id="shine" cx=".34" cy=".24" r=".84"><stop stop-color="#fff" stop-opacity=".66"/><stop offset=".45" stop-color="#fff" stop-opacity=".09"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="160" cy="421" rx="88" ry="11" fill="#000" opacity=".2"/>
+
+  <!-- broad top lip and narrow neck, based on the Henri Delaunay silhouette -->
+  <ellipse cx="160" cy="43" rx="54" ry="16" fill="url(#silver)" stroke="#f3f6f8" stroke-width="2"/>
+  <ellipse cx="160" cy="41" rx="42" ry="8" fill="#404b55" opacity=".45"/>
+  <path d="M120 47h80l-8 43c-8 10-19 16-32 16s-24-6-32-16l-8-43Z" fill="url(#silver)" stroke="#dce3e7" stroke-width="1.5"/>
+  <path d="M127 88c9 7 20 11 33 11s24-4 33-11l15 24c-13 9-29 13-48 13s-35-4-48-13l15-24Z" fill="url(#darkSilver)" stroke="#e2e8eb" stroke-width="1.4"/>
+
+  <!-- compact sculpted handles -->
+  <path d="M119 100c-24-10-43-3-51 17-12 30 1 55 38 72" fill="none" stroke="url(#silver)" stroke-width="15" stroke-linecap="round"/>
+  <path d="M111 115c-14-5-24 0-29 12-7 17 1 32 24 44" fill="none" stroke="#edf1f4" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M201 100c24-10 43-3 51 17 12 30-1 55-38 72" fill="none" stroke="url(#silver)" stroke-width="15" stroke-linecap="round"/>
+  <path d="M209 115c14-5 24 0 29 12 7 17-1 32-24 44" fill="none" stroke="#edf1f4" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M85 117c-4 7-6 14-6 22m156-22c4 7 6 14 6 22" fill="none" stroke="#69757f" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- large rounded body -->
+  <path d="M105 108c-12 39-15 96-9 147 7 62 25 100 50 116 6 4 10 6 14 7 4-1 8-3 14-7 25-16 43-54 50-116 6-51 3-108-9-147-15 10-33 15-55 15s-40-5-55-15Z" fill="url(#silver)" stroke="#f4f7f9" stroke-opacity=".76" stroke-width="2.1"/>
+  <path d="M118 122c-8 37-8 91-2 136 6 47 18 79 38 99" fill="none" stroke="#fff" stroke-opacity=".57" stroke-width="7" stroke-linecap="round"/>
+  <path d="M202 124c7 37 7 88 2 131-6 46-18 77-37 98" fill="none" stroke="#5c6872" stroke-opacity=".31" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="160" cy="210" rx="57" ry="105" fill="url(#shine)" opacity=".72"/>
+
+  <!-- restrained central engraving -->
+  <circle cx="160" cy="215" r="22" fill="#7e8992" opacity=".15" stroke="#fff" stroke-opacity=".34"/>
+  <text x="160" y="219" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="8" font-weight="800" letter-spacing="1.3" fill="#f7f9fa" opacity=".62">EURO</text>
+  <text x="160" y="251" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="700" letter-spacing="2.1" fill="#4d5962" opacity=".72">EUROPEAN</text>
+  <text x="160" y="264" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="700" letter-spacing="1.7" fill="#58646d" opacity=".66">CHAMPIONSHIP</text>
+
+  <!-- stepped foot -->
+  <path d="M145 365h30l-4 23h-22Z" fill="url(#darkSilver)" stroke="#e4eaed" stroke-width="1.4"/>
+  <path d="M130 385h60l8 14h-76Z" fill="url(#silver)" stroke="#edf1f3" stroke-width="1.4"/>
+  <path d="M108 398h104l8 22H100Z" fill="url(#darkSilver)" stroke="#e4e9ec" stroke-width="1.6"/>
+  <path d="M120 405h80" stroke="#fff" stroke-opacity=".34" stroke-width="2"/>
+</svg>

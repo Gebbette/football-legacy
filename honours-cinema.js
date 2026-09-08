@@ -147,7 +147,7 @@
       <div class="flCinemaCameraFlashes"><i></i><i></i><i></i><i></i></div>
       <div class="flCinemaParticles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       ${assetUrl ? `<span class="flCinemaTrophyGleam" style="--fl-trophy-mask:url('${assetUrl}')"></span>` : ''}
-      ${figure ? `<div class="flCinemaPlayerFigure"><svg class="flFigureEditorial" viewBox="0 0 220 330" role="img" aria-label="Illustration of the award winner in a suit holding the Ballon d'Or"><ellipse class="flDrawShadow" cx="110" cy="316" rx="77" ry="10"/><path class="flDrawJacket" d="M39 307V169c0-31 22-53 54-58l17 9 17-9c32 5 54 27 54 58v138H39Z"/><path class="flDrawShirt" d="M88 115h44l-8 94H96l-8-94Z"/><path class="flDrawLapel" d="M91 114 64 133l27 59 16-38-16-40Zm38 0 27 19-27 59-16-38 16-40Z"/><path class="flDrawTie" d="m110 126 10 13-5 14 8 54-13 16-13-16 8-54-5-14 10-13Z"/><rect class="flDrawNeck" x="96" y="85" width="28" height="35" rx="8"/><circle class="flDrawHead" cx="110" cy="61" r="38"/><path class="flDrawHair" d="M75 57c1-27 17-42 38-42 22 0 37 13 39 36-10-5-17-12-24-21-13 12-29 18-53 17Z"/><path class="flDrawFaceLine" d="M92 62h8m20 0h8M103 79c5 4 10 4 15 0"/><path class="flDrawArmLine" d="M68 157C76 179 80 204 94 225M152 157c-8 22-12 47-26 68"/><g class="flDrawTrophy"><path class="flDrawTrophyBase" d="M93 262h34l5 13H88l5-13Zm6-15h22v18H99v-18Z"/><circle class="flDrawTrophyBall" cx="110" cy="218" r="31"/><path class="flDrawTrophyFacet" d="m110 190 15 11-6 17-18 1-7-17 16-12Zm-9 29 9 27 9-28m-25-16 7 17-16 9m40-27-6 17 16 10"/></g><ellipse class="flDrawHand" cx="88" cy="225" rx="11" ry="8" transform="rotate(24 88 225)"/><ellipse class="flDrawHand" cx="132" cy="225" rx="11" ry="8" transform="rotate(-24 132 225)"/></svg></div>` : ''}
+      ${figure ? `<div class="flCinemaPlayerFigure"><svg class="flFigureEditorial" viewBox="0 0 260 360" aria-label="Clean illustration of the award winner in formalwear at the ceremony"><ellipse class="flDrawShadow" cx="132" cy="345" rx="80" ry="8"/><path class="flDrawLegBack" d="M108 202h31l-18 132H94l14-132Z"/><path class="flDrawLegFront" d="M137 201h30l16 133h-27l-19-133Z"/><path class="flDrawShoe" d="M92 331h31l6 10H84c1-5 3-8 8-10Zm62 0h30l10 10h-45c0-4 2-8 5-10Z"/><path class="flDrawArmBack" d="M96 116c-18 18-31 39-42 64l19 9c12-23 25-40 42-56l-19-17Z"/><path class="flDrawHand" d="M55 179c-5 2-7 6-5 10 3 4 8 5 13 3l10-5-7-12-11 4Z"/><path class="flDrawJacket" d="M97 103c12-8 27-12 43-11 18 1 34 7 44 18l-4 87c-18 9-38 13-60 12-18-1-34-5-47-12l11-67 13-27Z"/><path class="flDrawShirt" d="M119 101h31l12 100h-59l16-100Z"/><path class="flDrawLapel" d="m119 102-24 16 23 63 17-43-16-36Zm32 1 22 17-28 61-12-43 18-35Z"/><path class="flDrawTie" d="m135 111 9 12-8 14 7 62h-17l7-62-7-14 9-12Z"/><path class="flDrawArmFront" d="M174 119c11 23 9 47-5 72-8 13-19 23-32 31l-11-16c13-9 22-19 27-30 8-17 9-32 4-46l17-11Z"/><path class="flDrawHand" d="M128 205c-5 3-7 7-4 11 3 4 8 5 13 2l8-6-8-10-9 3Z"/><path class="flDrawNeck" d="M127 82h23l-1 22c-6 5-15 6-22 1V82Z"/><path class="flDrawHead" d="M113 41c6-15 20-21 35-18 15 3 24 15 23 32-1 11-5 21-13 29-7 7-16 10-25 6-11-4-19-15-21-28-2-8-1-15 1-21Z"/><path class="flDrawEar" d="M114 55c-5 0-7 4-6 10 2 5 5 7 9 7l2-14-5-3Z"/><path class="flDrawHair" d="M112 52c1-20 13-33 32-33 14 0 24 6 31 17-11-1-21-5-29-13-8 9-19 14-34 17v12Z"/><path class="flDrawFaceLine" d="M127 53h6m15 3h6m-6 7 4 6-4 2m-11 10c5 1 9 0 13-2"/><path class="flDrawPocket" d="M89 164h20m50 5h17"/></svg></div>` : ''}
       <div class="flCinemaTunnel"><i></i><i></i><i></i><i></i><i></i></div>
     </div>`;
   }
@@ -242,7 +242,13 @@
     root.addEventListener('keydown',keydown);
     skip.addEventListener('click',() => finish());
     reducedMotion.addEventListener('change',mediaChange);
-    if (reducedMotion.matches) { finish(false); root.focus({preventScroll:true}); return; }
+    if (reducedMotion.matches) {
+      root.classList.add('is-reduced-motion');
+      root.focus({preventScroll:true});
+      const readableHold = sharedBallon ? 9000 : (intro.startsWith('envelope') ? (intro === 'envelope-fast' ? 2300 : 2900) : Math.max(2200, Math.min(4200, duration - 700)));
+      timer = setTimeout(() => finish(false), readableHold);
+      return;
+    }
     root.focus({preventScroll:true});
 
     const scene = root.dataset.scene;

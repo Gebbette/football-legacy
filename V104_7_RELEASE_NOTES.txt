@@ -1,0 +1,37 @@
+FOOTBALL LEGACY V104.7 — PLAYTEST + CEREMONY POLISH
+
+MULTIPLAYER RELIABILITY
+- Persistent reconnect identity lets a refreshed/reconnected browser reclaim its existing player slot after a party has started.
+- Host room state is persisted locally so a host refresh can restore the room and wait for friends to reconnect.
+- Clients automatically try to reconnect when the host connection drops.
+- Disconnected players receive a 20-second grace period. After that the host can remove the disconnected slot and continue instead of being permanently deadlocked.
+- Ready/reveal gates remain strict while the player is merely disconnected; they only unblock after reconnection or explicit host removal.
+
+BALLON D'OR ACCESSIBILITY
+- Reduced Motion no longer collapses the mid-points Ballon d'Or reveal to a fraction of a second. It removes motion while preserving a readable ~9-second hold.
+
+TRANSFER REALISM
+- Almost no transfer churn immediately after joining a club.
+- Year two and year three interest ramps back gradually.
+- Clearly outgrowing a club still creates realistic escape routes.
+- Rejecting transfer interest creates a temporary loyalty effect that reduces repeat bids.
+- Multiple simultaneous bids are now uncommon rather than routine.
+
+QUICK STORY UX / QA
+- First-career tutorial prompt waits until game modals, decisions and transfer choices are clear instead of stacking over another layer.
+- Internal season-rating assertion updated for the legitimate elite/historic rating range.
+
+CEREMONY VISUAL POLISH
+- Replaced the award-ceremony figure with a cleaner flat editorial male illustration in formalwear, with no football and no pseudo-3D trophy built into the character.
+- Rebuilt the European Championship trophy around the recognisable Henri Delaunay silhouette: broad silver body, compact sculpted handles, narrow neck and stepped base, simplified to fit Football Legacy's visual language.
+- Ceremony asset cache version bumped so browsers load the new visuals rather than retaining V104.6 assets.
+
+THE BEST FIFA MEN'S PLAYER
+- The Best is now tied to an elite achievement season rather than a loose standalone random chance.
+- In Quick Story and Multiplayer, the player's pre-award Ballon d'Or-level achievement ranking must already be roughly top-six territory before The Best can be won.
+- This prevents contradictions such as winning The Best while ending around 11th in the Ballon d'Or.
+- The Best can still differ from the Ballon d'Or winner, but only among genuinely elite seasons.
+- OVR is not used as a direct reason to win The Best.
+
+UNCHANGED
+- Ballon d'Or ranking calibration, Champions League balance and Legacy scoring were deliberately left unchanged.

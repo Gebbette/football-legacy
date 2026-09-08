@@ -92,22 +92,23 @@
 .flCinemaTunnel i{position:absolute;left:50%;top:46%;width:84%;height:72%;transform:translate(-50%,-50%) scale(var(--t));border:1px solid rgba(var(--cinema-rgb),.22);border-radius:48% 48% 12% 12%;opacity:0}
 .flCinemaTunnel i:nth-child(1){--t:1}.flCinemaTunnel i:nth-child(2){--t:.8}.flCinemaTunnel i:nth-child(3){--t:.62}.flCinemaTunnel i:nth-child(4){--t:.46}.flCinemaTunnel i:nth-child(5){--t:.32}
 
-/* V104.6 — clean editorial award winner. Flat vector illustration, intentionally not pseudo-3D. */
-.flCinemaPlayerFigure{position:absolute;z-index:3;right:1.5%;bottom:7%;width:190px;height:304px;opacity:0;filter:drop-shadow(0 24px 18px rgba(0,0,0,.48));transform-origin:bottom center}
+/* V104.7 — clean editorial award winner. Deliberately flat, graphic and consistent with Football Legacy. */
+.flCinemaPlayerFigure{position:absolute;z-index:3;right:-1.5%;bottom:4.8%;width:215px;height:318px;opacity:0;filter:drop-shadow(0 23px 16px rgba(0,0,0,.42));transform-origin:bottom center}
 .flFigureEditorial{display:block;width:100%;height:100%;overflow:visible}
-.flDrawShadow{fill:rgba(0,0,0,.42)}
-.flDrawJacket{fill:#111722;stroke:#65717d;stroke-width:2;stroke-linejoin:round}
-.flDrawShirt{fill:#f1eee6;stroke:#c7c2b7;stroke-width:1.5}
-.flDrawLapel{fill:#202936;stroke:#7a8590;stroke-width:1.4;stroke-linejoin:round}
-.flDrawTie{fill:#c5a250;stroke:#e3c56f;stroke-width:1}
-.flDrawNeck,.flDrawHead,.flDrawHand{fill:#b8815e;stroke:#7a513b;stroke-width:2}
-.flDrawHair{fill:#202020;stroke:#0e0f10;stroke-width:2;stroke-linejoin:round}
-.flDrawFaceLine{fill:none;stroke:#72503c;stroke-width:2.1;stroke-linecap:round}
-.flDrawArmLine{fill:none;stroke:#111722;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke}.flDrawArmLine{filter:drop-shadow(0 0 0 #65717d)}
-.flDrawTrophyBase{fill:#b78b2d;stroke:#f0d16e;stroke-width:2;stroke-linejoin:round}
-.flDrawTrophyBall{fill:#d8ad44;stroke:#ffe192;stroke-width:3}
-.flDrawTrophyFacet{fill:none;stroke:#f7da82;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.flDrawShadow{fill:rgba(0,0,0,.28)}
+.flDrawJacket,.flDrawArmBack,.flDrawArmFront{fill:#171821;stroke:#333541;stroke-width:.9;stroke-linejoin:round}
+.flDrawShirt{fill:#f2f0ea;stroke:#d7d2c8;stroke-width:.9}
+.flDrawLapel{fill:#242631;stroke:#3a3e49;stroke-width:.8;stroke-linejoin:round}
+.flDrawTie{fill:#090c11}
+.flDrawNeck,.flDrawHead,.flDrawHand,.flDrawEar{fill:#c78c68;stroke:#9d684b;stroke-width:1.15}
+.flDrawHair{fill:#202126;stroke:#15161a;stroke-width:1.25;stroke-linejoin:round}
+.flDrawFaceLine{fill:none;stroke:#6f4b3a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.flDrawPocket{fill:none;stroke:#46515d;stroke-width:1.2;stroke-linecap:round}
+.flDrawLegBack{fill:#292833;stroke:#373640;stroke-width:.85;stroke-linejoin:round}
+.flDrawLegFront{fill:#1d1d27;stroke:#30303b;stroke-width:.85;stroke-linejoin:round}
+.flDrawShoe{fill:#090c10}
 .flCinema[data-scene="ballon"] .flCinemaPlayerFigure,.flCinema[data-scene="global"] .flCinemaPlayerFigure{mix-blend-mode:normal}
+.flCinema[data-scene="ballon"] .flCinemaPlayerFigure:after,.flCinema[data-scene="global"] .flCinemaPlayerFigure:after{content:'';position:absolute;left:18%;right:8%;bottom:-4px;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--cinema-rgb),.36),transparent)}
 
 /* World XI / Team of the Season: a selection card and pitch, not a trophy. */
 .flCinemaSelection{position:relative;width:min(92%,410px);height:390px;z-index:5;display:flex;align-items:center;justify-content:center}
@@ -178,7 +179,7 @@
   .flCinemaLines{inset:-5% -25% 48% -25%}.flCinemaLines i:nth-child(1){left:10%}.flCinemaLines i:nth-child(2){left:30%}.flCinemaLines i:nth-child(3){left:50%}.flCinemaLines i:nth-child(4){left:70%}.flCinemaLines i:nth-child(5){left:90%}
   .flCinemaOrbit{width:350px;height:350px;left:calc(50% - 175px);top:75px}.flCinemaExtras{justify-content:center}
   .flCinemaStageFx{inset:1% 0 7%}.flCinemaStageGlow{width:90%;top:70%}.flCinemaPedestal{bottom:7%;width:72%}.flCinemaSpotlights{inset:-18% -15% 5%}
-  .flCinemaPlayerFigure{right:-4%;bottom:5%;width:174px;height:282px;transform:scale(.78);transform-origin:bottom right}
+  .flCinemaPlayerFigure{right:-3%;bottom:5%;width:176px;height:282px;transform:scale(.8);transform-origin:bottom right}
   .flCinemaSelection{height:292px;width:100%}.flCinemaPitch{inset:18px 28px}.flCinemaSelectionCard{top:68px;width:150px;min-height:180px;padding:22px 14px 18px}.flCinemaSelectionCard span{width:39px;height:39px;margin-bottom:22px}.flCinemaSelectionCard strong{font-size:20px}.flCinemaSelectionPulse{width:190px;height:190px}
   .flCinemaCameraFlashes i{width:64px;height:64px}
 }

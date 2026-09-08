@@ -1,0 +1,8 @@
+FOOTBALL LEGACY V104.7 — VISUAL POLISH + THE BEST RECALIBRATION
+
+ADDITIONAL POLISH ON TOP OF THE PLAYTEST FIXES
+- EUROS trophy asset redesigned to better resemble the real Henri Delaunay Cup while staying clean and readable in Football Legacy’s premium style.
+- Ceremony player illustration rebuilt as a clean 2D formalwear figure that actually fits the game’s style and the award-stage composition.
+- The Best FIFA Men’s Player trophy art refined to feel more like the real award.
+- The Best FIFA Men’s Player is now much harder to win unless the season is already close to Ballon d’Or calibre, reducing unrealistic cases such as winning The Best from a much lower Ballon ranking.
+- Reduced-motion honours screens now keep the reveal readable instead of skipping almost instantly.

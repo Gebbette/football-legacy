@@ -1,0 +1,13 @@
+FOOTBALL LEGACY V104.6 — MULTIPLAYER REVEAL FIX
+
+- Ready-state reliability: clients resend ready acknowledgements until the host confirms them, preventing one lost ready message from freezing a party.
+- Ballon d’Or multiplayer now uses the same achievement/world-rank result as the season simulation. A party player ranked #1 triggers the shared Ballon d’Or reveal.
+- Ballon d’Or reveal moved into the middle of the shared points sequence.
+- Ballon rankings stay sealed during the private season review. They are revealed beneath each player in the points sequence, then become available in the post-points Season Review.
+- Added a post-points “View Season Review” control so players can revisit their season with the now-revealed Ballon ranking.
+- Shared Ballon d’Or envelope sequence extended substantially for readability.
+- Award-winner character replaced by a clean flat editorial SVG: suited player visibly holding the trophy, without pseudo-3D body-part styling.
+- Modal/tab backdrops no longer dismiss content when clicked; only explicit controls close it.
+- Multiplayer protocol/cache version bumped to prevent mixed-version party state.
+- Shared-party Ballon rank collisions are normalized (for example, two independently calculated #1s become #1/#2 by achievement score), so the shared ceremony can never contradict the displayed rankings.
+- Once a Ballon rank is revealed in the points show, that season stores the reveal state so later Season Review views may show it; before the reveal it stays sealed.
