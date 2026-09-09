@@ -169,7 +169,7 @@
       ? selectionMarkup(winner, player.position)
       : `<div class="flCinemaTrophyWrap"><img class="flCinemaTrophy" src="${assetUrl}" alt="" width="400" height="440" decoding="sync" loading="eager"></div>`;
 
-    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 16000 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
+    return `<section class="flCinema" data-scene="${scene}" data-tier="${tier}" data-prestige="${config.prestige}" data-intro="${intro}" data-duration="${isSharedBallon ? 22000 : config.duration}" data-shared-ballon="${isSharedBallon ? 1 : 0}" role="dialog" aria-modal="true" aria-label="${escape(title)} — ${escape(winner)}" tabindex="-1">
       <div class="flCinemaAtmosphere" aria-hidden="true"><div class="flCinemaWash"></div><div class="flCinemaHorizon"></div><div class="flCinemaLines"><i></i><i></i><i></i><i></i><i></i></div><div class="flCinemaOrbit"><i></i><i></i><i></i></div><div class="flCinemaStandard flCinemaStandardLeft"></div><div class="flCinemaStandard flCinemaStandardRight"></div></div>
       <header class="flCinemaHeader"><a class="flCinemaBrand" href="index.html" aria-label="Football Legacy home">FL<span>/</span> <b>FOOTBALL LEGACY</b></a><span class="flCinemaEdition">${escape(season.label || 'CAREER HONOURS')}</span></header>
       ${isSharedBallon ? sharedBallonPreludeMarkup(sharedFinalists) : ''}
@@ -245,7 +245,7 @@
     if (reducedMotion.matches) {
       root.classList.add('is-reduced-motion');
       root.focus({preventScroll:true});
-      const readableHold = sharedBallon ? 9000 : (intro.startsWith('envelope') ? (intro === 'envelope-fast' ? 2300 : 2900) : Math.max(2200, Math.min(4200, duration - 700)));
+      const readableHold = sharedBallon ? 13000 : (intro.startsWith('envelope') ? (intro === 'envelope-fast' ? 2300 : 2900) : Math.max(2200, Math.min(4200, duration - 700)));
       timer = setTimeout(() => finish(false), readableHold);
       return;
     }
@@ -254,7 +254,7 @@
     const scene = root.dataset.scene;
     const intro = root.dataset.intro;
     const prestige = Number(root.dataset.prestige) || 1;
-    const reveal = sharedBallon ? 9800 : (({ballon:3150,world:3150,europe:2900,premier:2650,global:2850,goldenboot:650,goldenglove:650,youth:2350,playeraward:2400,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
+    const reveal = sharedBallon ? 14500 : (({ballon:3150,world:3150,europe:2900,premier:2650,global:2850,goldenboot:650,goldenglove:650,youth:2350,playeraward:2400,worldxi:2050,continental:1900,international:1900,league:1800,cup:1550,award:1350})[scene] || 1800);
 
     // Individual-award announcement timing: readable hold, then a quick clean fade.
     if (intro.startsWith('envelope')) {
@@ -266,7 +266,7 @@
           {opacity:1,transform:'none',offset:.12},
           {opacity:1,transform:'none',offset:.82},
           {opacity:0,transform:'translateY(-10px)'}
-        ],{duration:3000,delay:150,easing:'cubic-bezier(.2,.72,.18,1)'});
+        ],{duration:3900,delay:180,easing:'cubic-bezier(.2,.72,.18,1)'});
         animate('.flCinemaBallonVote strong',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:650,delay:420});
         animate('.flCinemaBallonFinalist',[{opacity:0,transform:'translateY(14px) scale(.97)'},{opacity:1,transform:'none'}],{duration:520,delay:850,stagger:280});
         animate('.flCinemaBallonSealLine',[{opacity:0,transform:'scaleX(.65)'},{opacity:1,transform:'scaleX(1)'}],{duration:520,delay:1880});
@@ -276,17 +276,17 @@
           {opacity:1,transform:'none',offset:.10},
           {opacity:1,transform:'none',offset:.965},
           {opacity:0,transform:'translateY(-12px) scale(.985)'}
-        ],{duration:6500,delay:2800,easing:'cubic-bezier(.2,.72,.18,1)'});
-        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:900,delay:3000});
-        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:900,delay:4100,easing:'cubic-bezier(.3,.05,.2,1)'});
-        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.16)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:430,delay:4040});
+        ],{duration:10500,delay:3300,easing:'cubic-bezier(.2,.72,.18,1)'});
+        animate('.flCinemaEnvelope',[{opacity:0,transform:'translateY(36px) scale(.91)'},{opacity:1,transform:'translateY(0) scale(1.035)',offset:.74},{opacity:1,transform:'none'}],{duration:1050,delay:3600});
+        animate('.flCinemaEnvelopeFlap',[{transform:'rotateX(0deg)'},{transform:'rotateX(-178deg)'}],{duration:1050,delay:5000,easing:'cubic-bezier(.3,.05,.2,1)'});
+        animate('.flCinemaSeal',[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.16)',offset:.55},{opacity:0,transform:'translate(-50%,-50%) scale(.75)'}],{duration:500,delay:4940});
         animate('.flCinemaEnvelopeCard',[
           {transform:'translateY(82px) scale(.98)',opacity:0},
           {transform:'translateY(82px) scale(.98)',opacity:1,offset:.12},
           {transform:'translateY(-60px) scale(1.04)',opacity:1,offset:.48},
           {transform:'translateY(-60px) scale(1.04)',opacity:1}
-        ],{duration:1900,delay:4750,easing:'cubic-bezier(.14,.82,.18,1)'});
-        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.92)'},{filter:'brightness(1.15)',offset:.55},{filter:'brightness(1)'}],{duration:3200,delay:6100,easing:'ease-in-out'});
+        ],{duration:1800,delay:5600,easing:'cubic-bezier(.14,.82,.18,1)'});
+        animate('.flCinemaEnvelopeCard strong',[{filter:'brightness(.92)'},{filter:'brightness(1.15)',offset:.55},{filter:'brightness(1)'}],{duration:4700,delay:7400,easing:'ease-in-out'});
         animate('.flCinemaSharedImpact i',[{opacity:0,transform:'scale(.25)'},{opacity:1,transform:'scale(1)',offset:.22},{opacity:0,transform:'scale(1.55)'}],{duration:760,delay:reveal-80,stagger:70,easing:'ease-out'});
         audioStop = playSharedBallonDrumRoll(reveal - 180);
       } else {
