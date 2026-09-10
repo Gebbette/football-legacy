@@ -180,7 +180,7 @@
         <div class="flCinemaCopy"><div class="flCinemaCompetition">${escape(title)}</div><h2 class="flCinemaTitle">${headlines.map(line => `<span>${escape(line)}</span>`).join('')}</h2><p class="flCinemaNote">${escape(config.note)}</p><div class="flCinemaWinner"><span>${type === 'award' ? 'AWARDED TO' : 'A PLACE IN HISTORY FOR'}</span><strong>${escape(winner)}</strong><div>${escape(affiliation || '')}</div></div>${extras.length ? `<div class="flCinemaExtras">${extras.map(item => `<span>${escape(item)}</span>`).join('')}</div>` : ''}</div>
       </div>
       <footer class="flCinemaFooter"><div class="flCinemaMemento"><i></i><span>YOUR LEGACY, FOREVER.</span></div><button class="primary flCinemaContinue" id="${escape(buttonId)}" disabled>${escape(buttonLabel)} <span aria-hidden="true">→</span></button></footer>
-      <button type="button" class="flCinemaSkip" aria-label="Skip animation and show honour">Skip animation <span aria-hidden="true">↗</span></button>
+      <button type="button" class="flCinemaSkip" aria-label="Skip animation and reveal award now"><b>SKIP ANIMATION</b><span aria-hidden="true">Reveal award now →</span></button>
       <div class="flCinemaProgress" aria-hidden="true"><i></i></div>
     </section>`;
   }

@@ -97,9 +97,9 @@ window.flTrack=function(name,options){try{if(typeof window.plausible==='function
 
 <link rel="stylesheet" href="multiplayer.css?v=106">
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'" defer></script>
-<script src="multiplayer.js?v=108" defer></script>
-<link rel="stylesheet" href="honours-cinema.css?v=1048">
-<script src="honours-cinema.js?v=1048"></script>
+<script src="multiplayer.js?v=109" defer></script>
+<link rel="stylesheet" href="honours-cinema.css?v=1049">
+<script src="honours-cinema.js?v=1049"></script>
 
 
 <style id="flV104BallonReviewTabs">
@@ -1179,7 +1179,7 @@ function v104AchievementBallon(st,s){
 window.FL_BALLON_V1043={evaluate:v104AchievementBallon,calibration:'V104.4'};
 function v104RankHash(v){let h=2166136261>>>0;for(const c of String(v)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function v104BallonRank(s){
- const result=v104AchievementBallon(state,s);if(!result||result.rank>100)return null;return result
+ const result=window.FL_BALLON_V1043.evaluate(state,s);if(!result||result.rank>100)return null;return result
 }
 function v8SeasonReviewHtml(s,delta){
  const g=seasonGradeInfo(s.avg),trophies=Array.isArray(s.trophies)?s.trophies:[],awards=Array.isArray(s.awards)?s.awards:[],offerCount=state.pendingOffers?.length||0,ballonRaw=v104BallonRank(s),ballon=(location.pathname.toLowerCase().includes('multiplayer')&&!s?.ballonRankRevealed&&!window.FL_MP_BALLON_REVEALED)?null:ballonRaw;
@@ -1375,8 +1375,9 @@ function v9EliteFloor(st,s){
  if(p.position!=='GK'){const minG=Math.round(base[0]*scale+rand(st)*(2+power*1.1)),minA=Math.round(base[1]*scale+rand(st)*(2+power*.9));s.goals=Math.max(s.goals,minG);s.assists=Math.max(s.assists,minA)}
  if(ovr===99){if(p.position==='ST')s.goals=Math.max(s.goals,rint(st,34,48));if(p.position==='WG')s.goals=Math.max(s.goals,rint(st,23,36));if(['WG','AM','CM'].includes(p.position))s.assists=Math.max(s.assists,rint(st,17,29));if(p.position==='GK')s.avg=Math.max(s.avg,7.55+rand(st)*.18)}
  const dg=s.goals-oldG,da=s.assists-oldA;if(dg>0)p.career.goals+=dg;if(da>0)p.career.assists+=da;
- if(s.apps>=24){let ceiling=oldPos;if(ovr===99)ceiling=chance(st,.72)?1:2;else if(ovr===98)ceiling=chance(st,.58)?1:3;else if(ovr===97)ceiling=chance(st,.42)?1:3;else if(ovr===96)ceiling=chance(st,.28)?1:4;else ceiling=Math.min(oldPos,5);s.position=Math.min(oldPos,ceiling)}
- if(s.position===1&&oldPos!==1&&!s.trophies.includes(s.league)){s.trophies.push(s.league);p.career.trophies.push({year:s.year,name:s.league,club:s.club})}
+ /* V104.9: elite individual ability no longer force-overrides the club's league position.
+    The normal team-strength simulation already includes the player's influence; this prevents
+    a 97–99 OVR player at a modest club from being handed titles almost automatically. */
  s.eliteDominance=ovr>=97;return s
 }
 simulateSeason=function(st,choice=null){const s=V9BaseSimulate(st,choice);return v9EliteFloor(st,s)};
@@ -1443,4 +1444,108 @@ stayPut=function(st){
 window.FL_V1047_TRANSFER={retention:v1047OfferRetention,outgrown:v1047Outgrown};
 })();
 </script>
+
+<script id="flV1049QuickStoryRealism">
+(function(){
+'use strict';
+/* Club- and competition-aware honours model for Quick Story / Multiplayer. */
+const V1049BaseBallon=window.FL_BALLON_V1043?.evaluate;
+const TOP_FIVE=new Set(['England','Spain','Germany','Italy','France']);
+const SECONDARY_ELITE=new Set(['Portugal','Netherlands','Brazil','Argentina']);
+function v1049RankHash(v){let h=2166136261>>>0;for(const c of String(v)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function v1049RankFromScore(score){const pts=[[28,100],[32,92],[36,82],[40,70],[44,58],[48,48],[52,40],[56,33],[60,27],[64,22],[68,18],[72,14],[76,10],[80,7],[84,5],[88,3],[92,2]];if(score<28)return 101+Math.round((28-score)*2);for(let i=0;i<pts.length-1;i++){const [s0,r0]=pts[i],[s1,r1]=pts[i+1];if(score<=s1){const t=(score-s0)/(s1-s0);return Math.round(r0+(r1-r0)*t)}}return 2}
+const EUROPEAN_STRONG=new Set(['Scotland','Belgium','Turkey','Austria','Switzerland','Denmark','Norway','Sweden','Greece','Poland','Czechia','Croatia','Serbia']);
+function ctx(st,s){
+ const club=String(s?.club||st?.player?.club||''),cp=clubProfile(club),tier=Number(cp?.tier||clubInfo(club)?.tier||1),rep=Number(cp?.rep||clubRep(club)||60),country=cp?.country||clubInfo(club)?.country||'';
+ const leagueFactor=tier>1?({2:.34,3:.14,4:.07}[tier]||.05):(TOP_FIVE.has(country)?1:SECONDARY_ELITE.has(country)?.82:EUROPEAN_STRONG.has(country)?.70:.68);
+ return {club,cp,tier,rep,country,leagueFactor,topFlight:tier===1};
+}
+function removeCareerHonour(st,s,name,type='award'){
+ const list=st?.player?.career?.[type==='trophy'?'trophies':'awards'];if(!Array.isArray(list))return;
+ st.player.career[type==='trophy'?'trophies':'awards']=list.filter(x=>!(Number(x?.year)===Number(s?.year)&&String(x?.name||x)===String(name)));
+}
+function addCareerHonours(st,s,names,type){for(const name of names){const list=st.player.career[type];if(!list.some(x=>Number(x?.year)===Number(s.year)&&String(x?.name||x)===name))list.push({year:s.year,name,club:type==='trophies'?s.club:st.player.club})}}
+function domesticCupProb(st,s,cup){
+ const c=ctx(st,s),p=st.player,elite=clamp((c.rep-70)/28,0,1),tierMult={1:1,2:.18,3:.035,4:.014}[c.tier]||.01;
+ let q=(.003+Math.pow(elite,3)*.155)*tierMult;
+ const floor={1:.0012,2:.0010,3:.00035,4:.00012}[c.tier]||.0001;
+ q=Math.max(floor,q);
+ const playerImpact=clamp(1+(Number(p.rating)-squadLevel(c.club))*.012+(Number(s.avg)-6.8)*.16,.78,1.34);
+ if(/Carabao|League Cup/i.test(cup))q*=.90;
+ return clamp(q*playerImpact,.00008,.18);
+}
+maybeTrophies=function(st,s){
+ const p=st.player,c=ctx(st,s),won=[];
+ if(Number(s.position)===1)won.push(s.league);
+ for(const cup of (clubInfo(c.club)?.cups||[]).slice(0,2))if(chance(st,domesticCupProb(st,s,cup)))won.push(cup);
+ const slots=Math.min(4,leagueForClub(c.club)?.clubs?.length||4),prior=st.lastSeason,qualified=c.topFlight&&(prior?(Number(prior.position)<=slots||(prior.trophies||[]).some(t=>/Champions League|Europa League/i.test(String(t)))):c.rep>=88);
+ if(qualified){
+   const strength=clamp((c.rep-80)/18,0,1),form=clamp((Number(s.avg)-6.85)/.9,0,1),playerBoost=clamp((Number(p.rating)-squadLevel(c.club))/30,0,.18);
+   const q=clamp(.008+.205*Math.pow(strength,2.15)+form*.025+playerBoost*.035,.006,.245);
+   if(chance(st,q))won.push('Champions League');
+ }
+ addCareerHonours(st,s,won,'trophies');
+ return won;
+};
+function localAwardProb(base,s,boost=0){return clamp(base+Math.max(0,Number(s.avg)-7)*.62+boost,.02,.82)}
+maybeAwards=function(st,s){
+ if(st.mode!=='story')return [];
+ const p=st.player,c=ctx(st,s),contrib=(s.goals||0)+(s.assists||0),attack=['ST','WG','AM'].includes(p.position),mid=['AM','CM','DM'].includes(p.position),def=['CB','FB','DM'].includes(p.position),champ=Number(s.position)===1,ucl=(s.trophies||[]).includes('Champions League'),intl=(s.trophies||[]).some(x=>/World Cup|European Championship/i.test(String(x))),out=[];
+ const add=(name,ok,prob,priority)=>{if(ok&&chance(st,clamp(prob,.005,.90)))out.push({name,priority})};
+ /* Club and league honours can happen at any level, but only within that competition. */
+ add(`${p.club} Player of the Season`,s.apps>=20&&s.avg>=6.98,localAwardProb(.20,s,.03),38);
+ add(`${p.club} Supporters’ Player of the Season`,s.apps>=22&&s.avg>=7.03,localAwardProb(.14,s,.02),40);
+ add(`${s.league} Young Player of the Season`,p.age<=22&&s.apps>=20&&s.avg>=7.00,localAwardProb(.19,s,p.age<=20?.05:0),58);
+ add(`${s.league} Team of the Season`,s.apps>=24&&s.avg>=7.08,localAwardProb(.22,s,champ?.04:0),64);
+ add(`${s.league} Playmaker Award`,mid&&s.assists>=10&&s.avg>=7.03,clamp(.25+(s.assists-10)*.035+(champ?.04:0),.18,.72),70);
+ add(`${s.league} Golden Boot`,attack&&s.goals>=18,clamp(.30+(s.goals-18)*.035,.22,.82),78);
+ add(`${s.league} Golden Glove`,p.position==='GK'&&s.apps>=25&&s.avg>=7.02&&s.position<=6,localAwardProb(.20,s,champ?.07:0),78);
+ add(`${s.league} Defender of the Season`,def&&s.apps>=25&&s.avg>=7.18,localAwardProb(.10,s,champ?.05:0),80);
+ add(`${s.league} Midfielder of the Season`,mid&&s.apps>=25&&s.avg>=7.18,localAwardProb(.10,s,champ?.05:0),80);
+ add(`${s.league} Player of the Season`,s.apps>=27&&s.avg>=7.34,localAwardProb(.065,s,champ?.07:0),84);
+ /* Global awards require a credible top-flight platform. */
+ const globalStage=c.topFlight&&(c.rep>=74||intl||ucl),eliteStage=c.topFlight&&(c.rep>=80||intl||ucl),topEuropean=c.topFlight&&(TOP_FIVE.has(c.country)||SECONDARY_ELITE.has(c.country));
+ add('Golden Boy',globalStage&&p.age<=21&&s.apps>=22&&s.avg>=7.20,localAwardProb(.055,s,c.rep>=82?.025:0),72);
+ add('Kopa Trophy',globalStage&&p.age<=21&&s.apps>=24&&s.avg>=7.28,localAwardProb(.035,s,(intl||ucl)?.04:0),93);
+ add('UEFA Champions League Player of the Season',ucl&&s.avg>=7.28,localAwardProb(.13,s,.07),95);
+ const coef=TOP_FIVE.has(c.country)?1:SECONDARY_ELITE.has(c.country)?.86:.72,shoeScore=(s.goals||0)*coef;
+ add('European Golden Shoe',topEuropean&&attack&&shoeScore>=25,clamp(.14+(shoeScore-25)*.035,.10,.66),92);
+ add('Yashin Trophy',eliteStage&&p.position==='GK'&&s.avg>=7.38,localAwardProb(.045,s,(ucl||intl)?.06:0),94);
+ add('Gerd Müller Trophy',eliteStage&&attack&&s.goals>=30,clamp(.11+(s.goals-30)*.032,.08,.60),95);
+ /* Preview after the credible local/global shortlist; this same ranking controls the global awards. */
+ const previewSeason={...s,awards:out.slice().sort((a,b)=>b.priority-a.priority).slice(0,5).map(x=>x.name)};
+ const preview=window.FL_BALLON_V1043?.evaluate?window.FL_BALLON_V1043.evaluate(st,previewSeason):null;
+ const rank=Number(preview?.rank)||999;
+ add('FIFPRO Men’s World 11',eliteStage&&s.apps>=26&&s.avg>=7.28&&rank<=18,clamp(.10+(19-rank)*.012+(ucl||intl ? .08 : 0),.05,.48),96);
+ const bestCore=eliteStage&&s.apps>=27&&s.avg>=7.45&&(rank<=3||(rank<=5&&(ucl||intl)));
+ add('The Best FIFA Men’s Player',bestCore,rank===1?.34:rank<=3?.20:.09,98);
+ const selected=out.sort((a,b)=>b.priority-a.priority).slice(0,5).map(x=>x.name);
+ addCareerHonours(st,s,selected,'awards');
+ return selected;
+};
+function realismBallon(st,s){
+ const base=V1049BaseBallon(st,s),c=ctx(st,s),trophies=(s?.trophies||[]).map(String),majorIntl=trophies.some(x=>/World Cup|European Championship/i.test(x)),ucl=trophies.some(x=>/Champions League/i.test(x));
+ let score=base.score,rank=base.rank;
+ if(!c.topFlight){
+   score=+(score*c.leagueFactor).toFixed(2);rank=101+(v1049RankHash(`${st?.seed}|${s?.year}|${c.club}|lower-division-ballon`)%45);
+ }else{
+   score=+(score*(.84+.16*c.leagueFactor)).toFixed(2);
+   rank=score>=base.field?1:v1049RankFromScore(score);
+   let best=1;
+   if(c.rep<72)best=majorIntl?18:45;else if(c.rep<78)best=majorIntl?11:28;else if(c.rep<84)best=(majorIntl||ucl)?7:14;else if(c.rep<88)best=(majorIntl||ucl)?3:6;
+   rank=Math.max(rank,best);
+   if(rank===1&&c.rep<86&&!majorIntl)rank=2;
+   if(rank===1&&!majorIntl&&!ucl&&c.rep<90)rank=2;
+ }
+ rank=Math.min(160,Math.max(1,Math.round(rank)));
+ const won=rank===1,label=won?"Ballon d'Or winner":rank<=3?'Podium contender':rank<=10?'Elite contender':rank<=30?"In the Ballon d'Or conversation":rank<=60?'Strong top-100 season':rank<=100?'Inside the top 100':'Outside the top 100';
+ const reasons=(base.reasons||[]).filter(x=>!/\/100 achievement score/i.test(String(x)));reasons.unshift(`${Math.round(score)}/100 world-voting score`);if(!c.topFlight)reasons.unshift(`${c.cp.division} level — outside Ballon d’Or top-100 eligibility`);else if(c.rep<84)reasons.push(`${c.club} platform ${c.rep}/100`);
+ return {...base,score,rank,won,label,reasons:[...new Set(reasons)].slice(0,4),clubRep:c.rep,competitionFactor:c.leagueFactor};
+}
+window.FL_BALLON_V1043.evaluate=realismBallon;
+window.FL_BALLON_V1043.calibration='V104.9 club + competition realism';
+window.FL_V1049_REALISM={context:ctx,domesticCupProb,ballon:realismBallon};
+})();
+</script>
+
 </body></html>
