@@ -1,12 +1,18 @@
 {
-  "name": "Football Legacy",
+  "name": "Football Legacy – Football Career Simulator",
   "short_name": "Football Legacy",
-  "description": "Build a football career from prospect to legend.",
+  "description": "Free browser football career simulator: build a player career, win trophies and awards, and compete with friends.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
+  "lang": "en-GB",
   "display": "standalone",
   "background_color": "#07110c",
   "theme_color": "#07110c",
+  "categories": [
+    "games",
+    "sports"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
