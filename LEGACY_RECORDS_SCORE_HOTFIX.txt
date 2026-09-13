@@ -1,0 +1,7 @@
+Football Legacy — Legacy Records Score Hotfix
+
+- Legacy Records now uses the exact current Quick Story Legacy Score formula.
+- Existing V1 archive entries are corrected from the completed save on the player's device.
+- Score corrections no longer create duplicate career-history entries.
+- Career Express and Original Career continue to use their exact final career score.
+- No career saves, game logic, multiplayer logic or existing local data are reset.

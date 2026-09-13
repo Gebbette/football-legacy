@@ -37,33 +37,51 @@ function write(db){
     return true;
   }catch(e){return false}
 }
-function fingerprint(r){
-  return hash([r.mode,r.seed||'',r.playerName||'',r.seasons||0,r.apps||0,r.score||0,r.finalClub||''].join('|'));
+function identityKey(r){
+  // A career is identified by the save itself, not by its score. This lets us
+  // correct/re-sync a Legacy Score without creating a duplicate archive entry.
+  return hash([r.mode,r.seed||'',r.playerName||'',r.seasons||0,r.apps||0,r.finalClub||''].join('|'));
 }
+function fingerprint(r){return identityKey(r)}
 function saveRecord(record){
   if(!record||!MODE_META[record.mode])return false;
   const db=read();
-  record.id=record.id||fingerprint(record);
+  const stableId=identityKey(record);
+  record.id=stableId;
   record.completedAt=n(record.completedAt,Date.now());
-  const idx=db.careers.findIndex(x=>x&&x.id===record.id);
+  // Match both new stable IDs and records written by V1, whose ID incorrectly
+  // included the score. This repairs existing players' archives in-place.
+  const idx=db.careers.findIndex(x=>x&&(x.id===stableId||identityKey(x)===stableId));
   if(idx>=0){
-    // Preserve the first completion timestamp while allowing richer/newer fields to be filled in.
     record.completedAt=n(db.careers[idx].completedAt,record.completedAt);
-    db.careers[idx]={...db.careers[idx],...record};
+    db.careers[idx]={...db.careers[idx],...record,id:stableId};
   }else db.careers.unshift(record);
-  db.careers=db.careers.filter(Boolean).sort((a,b)=>n(b.completedAt)-n(a.completedAt)).slice(0,MAX_CAREERS);
+  // Remove any V1 duplicates for the same completed career.
+  const seen=new Set();
+  db.careers=db.careers.filter(Boolean).filter(x=>{const k=identityKey(x);if(seen.has(k))return false;seen.add(k);x.id=k;return true}).sort((a,b)=>n(b.completedAt)-n(a.completedAt)).slice(0,MAX_CAREERS);
   const ok=write(db);
   if(ok){try{window.dispatchEvent(new CustomEvent('fl-history-updated',{detail:{record}}))}catch(e){}}
   return ok;
 }
 
 function quickScore(s){
-  const p=s&&s.player||{},c=p.career||{};
+  // Keep this byte-for-byte equivalent in behaviour to Quick Story's current
+  // careerScore() / Legacy screen (V6 scoring), rather than the older formula.
+  const p=s&&s.player||{},c=p.career||{},seasons=arr(s&&s.history).length,peak=n(p.peak,p.rating);
   const trophyNames=names(c.trophies),awardNames=names(c.awards);
+  const major=trophyNames.filter(x=>/Champions League|World Cup|European Championship|Copa Libertadores/i.test(x)).length;
   const ballons=awardNames.filter(x=>x==="Ballon d'Or").length;
-  const major=trophyNames.filter(x=>x==='Champions League'||x==='World Cup').length;
-  const score=8+(n(p.peak)-55)*.92+Math.min(18,n(c.apps)/42)+Math.min(12,(n(c.goals)+n(c.assists))/45)+Math.min(16,trophyNames.length*2.3+major*3.2)+Math.min(18,awardNames.length*2.3+ballons*5)+Math.min(8,n(c.caps)/13);
-  return clamp(Math.round(score),0,100);
+  const records=arr(c.records).length,ga=n(c.goals)+n(c.assists);
+  const outputTarget=p.position==='GK'?80:['CB','FB','DM'].includes(p.position)?260:p.position==='CM'?500:900;
+  const ability=clamp((peak-58)/38*20,0,20);
+  const longevity=clamp(n(c.apps)/850*10,0,10)+clamp(seasons/23*4,0,4);
+  const output=p.position==='GK'?clamp(n(c.apps)/850*18,0,18):clamp(ga/outputTarget*18,0,18);
+  const team=clamp(trophyNames.length*1.05+major*1.75,0,16);
+  const individual=clamp(awardNames.length*.9+ballons*3.0,0,18);
+  const international=clamp(n(c.caps)/120*6+Math.min(2,trophyNames.filter(x=>/World Cup|European Championship/i.test(x)).length*2),0,8);
+  const recordScore=clamp(records*2.2,0,6),raw=ability+longevity+output+team+individual+international+recordScore;
+  const immortal=peak>=96&&n(c.apps)>=750&&major>=4&&ballons>=3&&awardNames.length>=10&&trophyNames.length>=14&&records>=1&&raw>=96;
+  return immortal?100:clamp(Math.round(raw),0,99);
 }
 function v3Peak(s){
   const p=s&&s.player||{};
