@@ -1,0 +1,4 @@
+Football Legacy V1.4.1
+- Opening screen TikTok bar moved to the very bottom of the opening page.
+- FREE BROWSER CAREER SIMULATOR now sits directly below the PLAY button.
+- All other V1.4 TikTok placements and decision-system fixes are unchanged.
