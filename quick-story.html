@@ -227,26 +227,384 @@ function scenarioPool(st){const p=st.player,role=roleAtClub(st),pool=[];
  if(p.clubYears>=2&&p.reputation>=28)pool.push({id:'loyalty',icon:'🎙️',title:'Questions about your future',text:`After ${p.clubYears} seasons at ${p.club}, reporters ask whether you expect to stay beyond the current campaign.`,context:[`${p.clubYears} seasons at club`,'Transfer speculation'],choices:[['Say you are open to a new challenge','Meaningfully increases transfer interest',{interest:.22,rep:2}],['Say you are happy at the club','Reduces transfer interest and settles the situation',{interest:-.12,perf:.025,rep:1}],['Avoid committing either way','Keeps some transfer interest alive',{interest:.06,rep:0}]]});
  if(p.captain)pool.push({id:'captain',icon:'©️',title:'Set standards as captain',text:'The manager asks you to help maintain standards during a demanding run of fixtures.',context:['Club captain','Leadership'],choices:[['Be vocal and demanding','More leadership reputation, with slightly more pressure',{rep:3,perf:.025,variance:.04}],['Lead by example','A steadier performance boost',{rep:1,perf:.055,variance:-.04}],['Keep the focus on your own preparation','Small personal development focus',{dev:.11,rep:0}]]});
  return pool}
+
+
+/* FOOTBALL LEGACY — EXPANDED MEANINGFUL DECISION PACK V1
+   Every choice below feeds real simulation levers: performance, development,
+   appearances, reputation, transfer interest, team results, captaincy,
+   international selection and award odds. */
+const flBaseScenarioPool=scenarioPool;
+function flDecisionEffectSummary(raw={}){
+  const bits=[];
+  if((raw.interest||0)>=.14)bits.push('transfer interest increased');
+  if((raw.interest||0)<=-.10)bits.push('transfer interest reduced');
+  if((raw.apps||0)>=2)bits.push('selection odds improved');
+  if((raw.apps||0)<=-2)bits.push('selection odds reduced');
+  if((raw.dev||0)>=.12)bits.push('development boosted');
+  if((raw.dev||0)<=-.06)bits.push('development slowed');
+  if((raw.perf||0)>=.045)bits.push('performance odds improved');
+  if((raw.perf||0)<=-.025)bits.push('performance became harder');
+  if((raw.rep||0)>=3)bits.push('reputation rose');
+  if((raw.rep||0)<=-2)bits.push('reputation took a hit');
+  if((raw.team||0)>=.8)bits.push('team-result odds improved');
+  if((raw.team||0)<=-.6)bits.push('team-result odds worsened');
+  if((raw.captain||0)>=.08)bits.push('captaincy odds increased');
+  if((raw.intl||0)>=.08)bits.push('international selection odds increased');
+  if((raw.award||0)>=.08)bits.push('award odds increased');
+  return bits.slice(0,3).join(', ');
+}
+function flDecisionTransferFallback(st,s){
+  const p=st.player;if(!p||p.age>=37)return null;
+  const current=clubProfile(p.club),value=playerMarketValue(st,s),perf=seasonPerformanceIndex(st,s);
+  const desired=clamp(current.rep+4+Math.max(0,perf)*4+(p.rating>=84?3:0),48,97);
+  const pool=ALL_CLUBS.filter(x=>x.club!==p.club&&(!isReserveClub(x.club)||p.age<=22)&&(p.age>=18||x.country===current.country)).filter(x=>{
+    const rep=clubRep(x.club),gap=p.rating-squadLevel(x.club),budget=clubTransferBudget(x.club,st.year+1);
+    return rep>=current.rep-4&&rep<=Math.min(98,current.rep+17)&&gap>=-10&&gap<=14&&budget>=value*(p.age>=33?.34:.52);
+  }).map(x=>({...x,score:Math.abs(clubRep(x.club)-desired)+Math.abs((p.rating-squadLevel(x.club))-1.5)*.55+rand(st)*4})).sort((a,b)=>a.score-b.score);
+  for(const x of pool.slice(0,12)){
+    const budget=clubTransferBudget(x.club,st.year+1),fee=Math.round(Math.min(value*(p.age>=33?.54:.76+rand(st)*.12),budget*.84)/100000)*100000;
+    if(fee<=0||fee>budget*.88)continue;
+    const fake={...st,player:{...p,club:x.club}},role=roleAtClub(fake,x.club);
+    return {club:x.club,country:x.country,division:x.division,rep:clubRep(x.club),squad:squadLevel(x.club),fee,budget,feePct:Math.round(fee/budget*100),finance:financialLabel(budget),reason:'Your decision to encourage a move pushed your agent and interested clubs to act',role,fit:transferFitScore(st,x.club),currency:'£'};
+  }
+  return null;
+}
+scenarioPool=function(st){
+  const p=st.player,role=roleAtClub(st),pool=flBaseScenarioPool(st),att=['ST','WG','AM','CM'].includes(p.position),young=p.age<=23,veteran=p.age>=30,elite=p.rating>=82,highRep=p.reputation>=35;
+  const add=(ok,id,icon,title,text,context,choices)=>{if(ok)pool.push({id,icon,title,text,context,choices})};
+  add(highRep||elite,'d01-big-club','🏟️','A huge club wants you, but minutes are uncertain','A heavyweight club has made its interest clear, but your route into the starting XI would be much tougher.',['Transfer interest',role],[
+    ['Take the dream move','Pushes transfer activity up sharply but risks your playing time',{interest:.34,apps:-2,perf:-.015,rep:4,variance:.08}],
+    ['Stay where you are starting','Strongly cools transfer interest and protects continuity',{interest:-.24,apps:2,perf:.045,rep:1,variance:-.04}],
+    ['Ask for a clear role first','Keeps interest alive while protecting your chances of minutes',{interest:.14,apps:1,perf:.02,rep:2}]
+  ]);
+  add(young,'d02-position-change','🔀','The manager wants to change your position','The staff think a different role could unlock another level, but adapting would take time.',['Tactical development',role],[
+    ['Fully embrace the switch','Higher long-term development with short-term adaptation risk',{dev:.22,perf:-.035,apps:-1,variance:.08,rep:2}],
+    ['Learn it as a second role','Balanced development and selection flexibility',{dev:.14,perf:.025,apps:1,rep:1}],
+    ['Fight for your old role','Protects immediate familiarity but limits tactical growth',{dev:-.04,perf:.045,apps:0,rep:-1,variance:-.03}]
+  ]);
+  add(true,'d03-form-collapse','📉','Your form has suddenly collapsed','A run of poor performances has put your confidence and place under pressure.',['Form',role],[
+    ['Train through it','Higher upside but more volatility',{dev:.13,perf:.015,variance:.12,apps:0}],
+    ['Simplify your game','Best chance of stabilising performances',{perf:.075,variance:-.09,apps:1,rep:1}],
+    ['Take the pressure off','Protects confidence but may cost minutes',{perf:.035,apps:-2,variance:-.06,dev:.05}]
+  ]);
+  add(young&&!p.captain&&highRep,'d04-young-captain','©️','You are offered the captaincy surprisingly young','The dressing room is watching how you respond to an early leadership opportunity.',['Leadership',`Age ${p.age}`],[
+    ['Accept immediately','Big leadership upside with extra pressure',{captain:.22,rep:4,perf:.015,variance:.08}],
+    ['Accept but stay understated','Strong captaincy odds with steadier performance',{captain:.16,rep:2,perf:.045,variance:-.03}],
+    ['Say you are not ready','Protects performance but sharply lowers immediate captaincy odds',{captain:-.18,perf:.055,rep:-1}]
+  ]);
+  add(true,'d05-rival','⚔️','A teammate is competing for your starting place','A direct positional rival has hit form and the manager is rotating between you.',['Selection battle',role],[
+    ['Turn it into a rivalry','More intensity and upside, but less consistency',{apps:1,perf:.035,variance:.10,rep:2}],
+    ['Train together','Improves consistency and development',{dev:.12,perf:.055,variance:-.05,apps:1}],
+    ['Ignore the competition','Keeps focus narrow but gives away some selection edge',{apps:-1,perf:.02,variance:-.02}]
+  ]);
+  add(highRep,'d06-massive-bid','💰','Your club receives a massive bid for you','A major offer has changed the mood around the club and the transfer market is heating up.',['Major transfer bid',p.club],[
+    ['Push for the transfer','Makes a move much more likely',{interest:.38,rep:2,perf:-.015,variance:.06}],
+    ['Let the club decide','Keeps a meaningful chance of a move without forcing it',{interest:.17,rep:1,perf:.015}],
+    ['Publicly commit to staying','Strongly reduces transfer probability and settles your role',{interest:-.30,perf:.055,rep:2,apps:1}]
+  ]);
+  add(true,'d07-exhausted','🪫','You are being played while exhausted','The schedule is catching up with you and your recovery numbers are falling.',['Fitness',role],[
+    ['Tell the manager','Protects performance but can cost appearances',{apps:-2,perf:.065,variance:-.07,dev:.04}],
+    ['Play through it','More minutes with a real performance risk',{apps:2,perf:-.055,variance:.12,dev:-.06}],
+    ['Ask to be used from the bench','A compromise between availability and recovery',{apps:-1,perf:.04,variance:-.03}]
+  ]);
+  add(att,'d08-bonus-goal','🎯','You are one goal from a major bonus','One more goal would trigger a major personal milestone, but the team still has its own targets.',['Personal milestone','Attacking role'],[
+    ['Chase the goal','Raises personal attacking upside but hurts team balance',{perf:.025,variance:.11,team:-.55,rep:1}],
+    ['Keep playing normally','Balanced odds across personal and team outcomes',{perf:.045,team:.25,variance:-.02}],
+    ['Put the team first completely','Improves team-result odds but reduces personal spotlight',{team:1.05,perf:.035,award:-.04,rep:2}]
+  ]);
+  add(true,'d09-dropped-big-match','🪑','The manager drops you before a huge match','You have been left out at the worst possible time and everyone wants your reaction.',['Manager decision',role],[
+    ['Demand an explanation','Can force clarity but risks trust and selection',{apps:-1,rep:1,perf:.02,variance:.10}],
+    ['Prove them wrong in training','Boosts selection and development odds',{apps:2,dev:.14,perf:.045,rep:2}],
+    ['Stay patient','Steadier performance and manager trust',{apps:1,perf:.055,variance:-.06,rep:1}]
+  ]);
+  add(p.clubYears>=2,'d10-agent-outgrown','🧑‍💼','Your agent says you have outgrown the club','Your representative thinks this is the moment to test the market.',['Agent advice',p.club],[
+    ['Tell them to find offers','A major boost to transfer probability',{interest:.35,rep:2,variance:.04}],
+    ['Wait another season','Keeps mild interest without forcing a move',{interest:.08,perf:.035,dev:.05}],
+    ['Tell them you are staying','Strongly suppresses transfer interest',{interest:-.27,perf:.045,rep:1,team:.35}]
+  ]);
+  add(att,'d11-penalty-row','🥅','A teammate takes the penalty you wanted','There is tension over set-piece responsibility after a penalty dispute.',['Team chemistry','Set pieces'],[
+    ['Let it go','Improves team stability',{team:.75,perf:.035,variance:-.04}],
+    ['Discuss it privately','Balanced route with a small reputation gain',{team:.4,rep:1,perf:.04}],
+    ['Demand the next one','More personal spotlight but more volatility',{award:.06,rep:2,team:-.45,variance:.08}]
+  ]);
+  add(true,'d12-minor-injury','🩹','The club wants you to play through a minor injury','Medical staff say you can play, but the risk rises if you keep pushing.',['Fitness risk',role],[
+    ['Play the match','More appearances but lower performance and development odds',{apps:2,perf:-.05,dev:-.07,variance:.12,rep:2}],
+    ['Ask to be protected','Fewer minutes, better recovery and consistency',{apps:-2,perf:.065,dev:.07,variance:-.08}],
+    ['Only play if desperately needed','Smaller minute cost with safer performance',{apps:-1,perf:.045,variance:-.04,team:.25}]
+  ]);
+  add(p.reputation>=26,'d13-fan-favourite','💚','You have become an unexpected fan favourite','Supporters are singing your name and your profile is growing quickly.',['Supporters',p.club],[
+    ['Embrace the spotlight','Raises reputation and award visibility, with pressure attached',{rep:4,award:.08,perf:.02,variance:.08}],
+    ['Keep a low profile','More stable performances with less publicity',{rep:1,perf:.055,variance:-.06}],
+    ['Use it to demand a bigger role','Improves selection odds but creates pressure',{apps:2,rep:2,perf:.02,variance:.07}]
+  ]);
+  add(true,'d14-public-criticism','🗞️','Your manager criticises you publicly','The manager questions your recent contribution in front of the media.',['Media pressure','Manager relationship'],[
+    ['Respond on the pitch','Higher performance upside with pressure',{perf:.065,variance:.08,rep:2}],
+    ['Talk privately','Steady selection and performance boost',{apps:1,perf:.05,variance:-.04,rep:1}],
+    ['Publicly defend yourself','Raises profile but risks selection stability',{rep:3,apps:-1,perf:.01,variance:.12}]
+  ]);
+  add(p.rating>=72,'d15-money-weaker-league','💷','A huge contract arrives from a weaker league','The money is enormous, but the football level would be lower.',['Transfer decision','Career direction'],[
+    ['Take the money','Sharply raises transfer activity, but lowers competitive development',{interest:.34,dev:-.08,rep:1,perf:.03}],
+    ['Prioritise competition','Reduces transfer interest and boosts sporting progression',{interest:-.20,dev:.14,perf:.04,rep:2}],
+    ['Negotiate a short deal','Keeps strong transfer odds without fully committing',{interest:.20,dev:.04,rep:2}]
+  ]);
+  add(true,'d16-superstar-signing','🌟','Your club signs a superstar in your position','A major new arrival could change your role immediately.',['Squad competition',role],[
+    ['Welcome the competition','Improves development and keeps selection competitive',{dev:.15,apps:0,perf:.045,rep:1}],
+    ['Ask about your role','Protects some selection odds',{apps:1,perf:.035,rep:1}],
+    ['Consider leaving','Boosts transfer probability but unsettles your season',{interest:.26,apps:-1,perf:-.015,variance:.08}]
+  ]);
+  add(att,'d17-crucial-penalty','⚽','You have the chance to take a crucial penalty','The next penalty could define the match and your status in the team.',['Big moment','Set pieces'],[
+    ['Step up','More award and reputation upside, but higher variance',{award:.09,rep:3,perf:.025,variance:.11}],
+    ['Give it to the specialist','Improves team-result odds and consistency',{team:.75,perf:.045,variance:-.05}],
+    ['Let the captain choose','Balanced team-first response',{team:.4,rep:1,perf:.035}]
+  ]);
+  add(p.rating>=68,'d18-national-call','🌍','Your national team calls during poor club form','International football offers a chance to reset your momentum.',['International football',p.nationality],[
+    ['Treat it as a fresh start','Boosts international and club performance odds',{intl:.14,perf:.055,rep:2}],
+    ['Keep things simple','Improves selection stability and consistency',{intl:.09,perf:.045,variance:-.05}],
+    ['Try to make a statement','Big international upside with higher volatility',{intl:.18,rep:3,perf:.025,variance:.10}]
+  ]);
+  add(p.age>=24,'d19-mentor','🧑‍🏫','A younger academy player asks for your help','A prospect wants your advice and time during the season.',['Leadership','Academy'],[
+    ['Mentor them closely','Raises leadership and captaincy odds but costs some personal development time',{captain:.10,rep:3,dev:-.03,team:.55}],
+    ['Give occasional advice','Balanced leadership gain',{captain:.05,rep:2,team:.3}],
+    ['Focus on yourself','Boosts your own development but does little for leadership',{dev:.12,captain:-.03,rep:0}]
+  ]);
+  add(['CB','FB','DM','CM'].includes(p.position),'d20-defensive-role','🧱','Your manager wants you to become more defensive','The tactical plan asks you to sacrifice some freedom for structure.',['Tactical role',p.position],[
+    ['Commit to the system','Boosts team results and selection trust',{team:1.05,apps:1,perf:.04,award:-.03}],
+    ['Balance both sides','Steady all-round effect',{team:.55,perf:.05,dev:.05}],
+    ['Keep playing naturally','More personal freedom but weaker tactical fit',{perf:.025,variance:.08,team:-.45,rep:-1}]
+  ]);
+  add(p.clubYears>=2,'d21-contract-year','✍️','Your contract is entering its final year','The club wants clarity before the season becomes dominated by speculation.',['Contract situation',p.club],[
+    ['Sign a new deal','Strongly reduces transfer interest and improves stability',{interest:-.28,perf:.05,team:.45,rep:1}],
+    ['Run it down','Massively increases transfer interest but adds pressure',{interest:.36,rep:2,variance:.09,perf:-.01}],
+    ['Wait for better terms','Keeps meaningful transfer interest alive',{interest:.18,rep:1,perf:.015}]
+  ]);
+  add(true,'d22-early-subs','⏱️','You are regularly being substituted early','Your minutes are being managed and you want to understand why.',['Playing time',role],[
+    ['Ask the manager why','Can improve future selection but adds pressure',{apps:2,perf:.025,variance:.06,rep:1}],
+    ['Improve your fitness','Boosts development and future appearances',{dev:.14,apps:1,perf:.04}],
+    ['Accept your role','Steadier performance but no big minute push',{perf:.055,variance:-.05}]
+  ]);
+  add(att,'d23-hat-trick','🔥','You score a hat-trick before a massive match','Momentum is sky-high, but the next fixture matters even more.',['Red-hot form','Big match'],[
+    ['Ride the momentum','Big performance and award upside with volatility',{perf:.07,award:.10,variance:.08,rep:3}],
+    ['Stay grounded','Strong stable performance boost',{perf:.06,variance:-.05,rep:1}],
+    ['Rest and recover','Fewer minutes but better consistency',{apps:-1,perf:.05,variance:-.07,dev:.04}]
+  ]);
+  add(true,'d24-manager-sacked','🚪','Your manager is suddenly sacked','A new coach will arrive with different ideas and no guarantees.',['Manager change',p.club],[
+    ['See it as a fresh start','Improves performance and selection odds',{apps:1,perf:.06,variance:-.02}],
+    ['Worry about your role','Hurts stability but can trigger a response',{apps:-1,perf:-.025,variance:.10}],
+    ['Consider following him out','Sharply increases transfer interest',{interest:.27,perf:.005,rep:1}]
+  ]);
+  add(true,'d25-system-doesnt-fit','🧩','The new manager does not favour your position','The tactical system leaves your natural role on the edge of the plan.',['Tactical fit',p.position],[
+    ['Adapt your game','Strong development and selection response',{dev:.18,apps:1,perf:.04}],
+    ['Prove the system wrong','High-risk performance route',{perf:.06,variance:.12,rep:2}],
+    ['Look for a transfer','Meaningfully raises transfer probability',{interest:.30,apps:-1,perf:-.015}]
+  ]);
+  add(att,'d26-free-kicks','🎯','You are offered responsibility for free kicks','The staff are deciding who should take direct set pieces.',['Set pieces','Attacking responsibility'],[
+    ['Take them all','Raises award and reputation upside but adds pressure',{award:.08,rep:2,perf:.03,variance:.08}],
+    ['Share responsibility','Balanced performance and team benefit',{perf:.05,team:.35,rep:1}],
+    ['Stick to your normal role','Stable performance, less individual upside',{perf:.045,variance:-.04,award:-.03}]
+  ]);
+  add(p.age>=21,'d27-childhood-club','❤️','Your childhood club makes an offer','An emotional move is suddenly possible, even if the sporting fit is not perfect.',['Transfer story','Personal connection'],[
+    ['Make the emotional move','Large transfer boost with variable sporting outcome',{interest:.32,rep:3,perf:.01,variance:.10}],
+    ['Stay at the stronger club','Reduces transfer interest and protects performance level',{interest:-.22,perf:.055,dev:.05}],
+    ['Ask them to return later','Keeps some future market momentum',{interest:.11,rep:2,perf:.025}]
+  ]);
+  add(att,'d28-selfish-play','😤','A teammate is furious after you did not pass','A missed pass has caused visible frustration inside the team.',['Team chemistry','Attacking decision'],[
+    ['Apologise','Improves team-result odds and stabilises performance',{team:.7,perf:.045,variance:-.04}],
+    ['Explain your decision','Balanced response with small reputation gain',{team:.35,rep:1,perf:.035}],
+    ['Tell them to get over it','Raises edge and volatility but hurts team balance',{rep:2,team:-.7,variance:.10,perf:.015}]
+  ]);
+  add(true,'d29-injury-prone','🧬','You are becoming known as injury-prone','Your availability is becoming part of the conversation around your career.',['Fitness reputation',role],[
+    ['Change your training','Boosts consistency and development efficiency',{apps:1,dev:.12,perf:.05,variance:-.07}],
+    ['Keep pushing normally','Keeps minutes high but increases volatility',{apps:1,perf:.015,variance:.10}],
+    ['Reduce workload heavily','Protects performance but costs appearances',{apps:-3,perf:.065,variance:-.08,dev:.03}]
+  ]);
+  add(true,'d30-final-knock','🏆','Your club reaches a final, but you are carrying a knock','The biggest match of the season arrives with your fitness in doubt.',['Cup final','Fitness'],[
+    ['Start the final','Boosts team and reputation upside but with real performance risk',{team:.75,rep:3,apps:1,perf:-.025,variance:.13}],
+    ['Begin on the bench','Safer performance with smaller team impact',{team:.4,perf:.045,variance:-.03}],
+    ['Miss it and recover','Protects your longer-term performance but gives up the moment',{apps:-2,perf:.065,dev:.07,rep:-1}]
+  ]);
+  add(att,'d31-goal-drought','🥶','You have gone ten matches without scoring','The goal drought is becoming a weekly talking point.',['Form pressure','Goal drought'],[
+    ['Shoot whenever possible','Raises goal upside and variance',{perf:.035,award:.05,variance:.12,team:-.35}],
+    ['Focus on creating chances','Improves team results and steadies performance',{team:.8,perf:.055,variance:-.05}],
+    ['Ignore the streak','Keeps the overall performance balanced',{perf:.045,variance:-.03}]
+  ]);
+  add(p.reputation>=30,'d32-rival-rumours','📰','The media links you with your club’s biggest rival','A transfer rumour has landed in the one place guaranteed to cause noise.',['Transfer speculation','Rivalry'],[
+    ['Shut the rumours down','Strongly lowers transfer interest and boosts stability',{interest:-.25,perf:.05,team:.35,rep:1}],
+    ['Say nothing','Keeps some transfer chance alive',{interest:.10,perf:.025}],
+    ['Fuel the speculation','Big transfer boost with reputation volatility',{interest:.31,rep:3,perf:-.015,variance:.09}]
+  ]);
+  add(true,'d33-red-card','🟥','Your teammate has been sent off in a crucial match','The team is down to ten and needs a response.',['Big match','Team responsibility'],[
+    ['Become more defensive','Strongly improves team-result odds',{team:1.15,perf:.035,award:-.02}],
+    ['Keep attacking','More personal upside but riskier team outcome',{perf:.055,award:.05,team:-.45,variance:.08}],
+    ['Take control of the team','Boosts leadership, team and captaincy odds',{team:.8,rep:3,captain:.09,perf:.04}]
+  ]);
+  add(p.reputation>=24,'d34-number-ten','🔟','You are offered the number 10 shirt','A symbolic shirt number would place more attention on your performances.',['Squad status','Reputation'],[
+    ['Take it proudly','Raises reputation and award visibility, with pressure',{rep:4,award:.07,variance:.07,perf:.02}],
+    ['Keep your current number','Protects consistency and lowers pressure',{perf:.055,variance:-.05,rep:1}],
+    ['Wait until you have earned it','Boosts development and long-term reputation',{dev:.11,rep:2,perf:.03}]
+  ]);
+  add(true,'d35-final-position','🧠','The manager asks you to play out of position in a final','The tactical plan for the final puts you in an unfamiliar role.',['Cup final','Tactical sacrifice'],[
+    ['Do whatever the team needs','Improves team and leadership odds',{team:1.05,rep:3,captain:.05,perf:.015}],
+    ['Ask to play your best role','Boosts personal performance but weakens team flexibility',{perf:.065,team:-.35,rep:0}],
+    ['Offer a tactical compromise','Balanced performance and team boost',{perf:.045,team:.55,rep:1}]
+  ]);
+  add(highRep&&p.age<=31,'d36-january-ucl','🌌','You can join a Champions League club in January','A mid-season move to a bigger stage is suddenly available.',['January transfer','Champions League'],[
+    ['Move immediately','Massively boosts transfer odds, with adaptation risk',{interest:.38,rep:4,perf:-.025,apps:-1,variance:.09}],
+    ['Finish the season here','Strongly reduces immediate move probability and protects form',{interest:-.22,perf:.06,team:.5}],
+    ['Only move with guaranteed minutes','Keeps strong interest while protecting selection',{interest:.22,apps:1,perf:.025,rep:2}]
+  ]);
+  add(p.reputation>=28,'d37-media-attention','📸','You are suddenly getting heavy media attention','Your profile has grown faster than your ability to escape the spotlight.',['Media attention','Reputation'],[
+    ['Enjoy the attention','Raises reputation and awards, but performance becomes less stable',{rep:4,award:.07,perf:.015,variance:.09}],
+    ['Block it out','Strongly improves consistency',{perf:.06,variance:-.07,rep:1}],
+    ['Use it as motivation','Boosts development and performance with some pressure',{dev:.11,perf:.05,variance:.04,rep:2}]
+  ]);
+  add(true,'d38-best-friend-leaves','👋','Your best friend at the club is transferred','A close teammate has left and the dressing-room dynamic changes.',['Dressing room',p.club],[
+    ['Focus on football','Protects performance but adds little socially',{perf:.05,variance:-.03}],
+    ['Tell the club you are unhappy','Raises transfer interest and volatility',{interest:.24,rep:1,perf:-.02,variance:.09}],
+    ['Help the new players settle','Improves team results and leadership standing',{team:.7,rep:2,captain:.06,perf:.03}]
+  ]);
+  add(p.clubYears>=5,'d39-appearance-record','📚','You are approaching a club appearance record','History is within reach, but future opportunities may not wait.',['Club record',`${p.clubYears} seasons`],[
+    ['Stay and chase history','Strongly lowers transfer interest and improves selection continuity',{interest:-.30,apps:2,rep:3,perf:.035}],
+    ['Ignore records when choosing moves','Keeps transfer market open',{interest:.17,rep:1,perf:.025}],
+    ['Decide at the end of the season','Leaves a smaller transfer possibility alive',{interest:.08,apps:1,perf:.03}]
+  ]);
+  add(true,'d40-protect-lead','🛡️','Your team is protecting a one-goal lead','The final stage of a huge match needs a tactical choice.',['Match management','Team result'],[
+    ['Drop deeper','Best team-result protection but less personal attacking upside',{team:1.0,perf:.04,award:-.03}],
+    ['Stay ready for the counter','Balanced team and personal upside',{team:.65,perf:.05,award:.03}],
+    ['Keep attacking','Higher personal upside with more team risk',{perf:.06,award:.05,team:-.45,variance:.08}]
+  ]);
+  add(p.age>=24,'d41-young-threat','🌱','A young player is threatening your place','An academy prospect is developing quickly in your position.',['Squad competition',role],[
+    ['Help develop them','Boosts leadership and team culture, but not your minute advantage',{captain:.08,rep:3,team:.55,apps:-1}],
+    ['Raise your own intensity','Improves selection and performance with more volatility',{apps:2,perf:.055,variance:.06}],
+    ['Ask for assurances','Protects some appearances but raises transfer tension',{apps:1,interest:.10,rep:1,variance:.04}]
+  ]);
+  add(p.clubYears>=1,'d42-former-boss','📞','Your former boss wants to sign you','A manager who already trusts you has made contact about a reunion.',['Transfer interest','Manager trust'],[
+    ['Reunite with them','Large transfer boost and strong selection odds',{interest:.33,apps:2,perf:.035,rep:2}],
+    ['Stay on your current path','Reduces transfer interest and protects continuity',{interest:-.21,perf:.055,dev:.04}],
+    ['Hear their plans first','Keeps meaningful interest alive with smaller risk',{interest:.15,apps:1,perf:.025}]
+  ]);
+  add(role==='Star Player','d43-top-rated','👑','You have become the team’s highest-rated player','Your status has changed and teammates now look to you for standards.',['Star player','Leadership'],[
+    ['Become more demanding','Raises leadership and captaincy odds but adds pressure',{captain:.11,rep:4,team:.45,variance:.06}],
+    ['Lead by example','Strong team and performance boost',{captain:.08,team:.75,perf:.055,rep:2}],
+    ['Keep the same mentality','Steady personal performance',{perf:.05,variance:-.04,rep:1}]
+  ]);
+  add(true,'d44-fans-boo','📣','Fans boo the team after a terrible defeat','The players are being called over to face angry supporters.',['Supporters','Pressure'],[
+    ['Go over and face them','Raises reputation and leadership, with emotional volatility',{rep:4,captain:.07,perf:.02,variance:.08}],
+    ['Leave quietly','Protects immediate focus but costs reputation',{perf:.04,rep:-2,variance:-.02}],
+    ['Rally your teammates first','Boosts team response and captaincy odds',{team:.85,captain:.09,rep:2,perf:.035}]
+  ]);
+  add(clubProfile(p.club).stature==='Survival battle'||clubProfile(p.club).stature==='Relegation battle','d45-relegation','🚨','Your club is fighting relegation','The season has turned into a battle to stay in the division.',['Relegation fight',p.club],[
+    ['Commit to saving them','Strong team and reputation boost, lower transfer interest',{team:1.15,rep:4,interest:-.18,perf:.035}],
+    ['Prepare for a summer exit','Raises transfer probability but slightly hurts focus',{interest:.24,perf:-.015,rep:1}],
+    ['Ask to leave in January','Very large transfer boost with team and reputation cost',{interest:.38,team:-.65,rep:-1,perf:-.02}]
+  ]);
+  add(clubProfile(p.club).stature==='Title contender'||clubProfile(p.club).stature==='Promotion favourite','d46-title-race','🏁','Your club is unexpectedly challenging for the title','The run-in is becoming a genuine chance to win something major.',['Title race',p.club],[
+    ['Take more responsibility','Raises performance and award upside with pressure',{perf:.065,award:.09,rep:3,variance:.07}],
+    ['Keep doing what worked','Best consistency route',{perf:.06,variance:-.06,team:.35}],
+    ['Sacrifice personal numbers for results','Strongest team-result boost, smaller award upside',{team:1.2,perf:.04,award:-.05,rep:2}]
+  ]);
+  add(true,'d47-shootout','🥅','You are asked to take a decisive shootout penalty','The order is being chosen and the pressure is enormous.',['Penalty shootout','Big moment'],[
+    ['Volunteer for fifth','Huge reputation and award upside with maximum variance',{rep:4,award:.10,variance:.13,perf:.02}],
+    ['Take one early','Good big-match upside with less volatility',{rep:2,award:.06,perf:.045,variance:.05}],
+    ['Let someone else step up','Protects consistency but loses spotlight',{team:.5,perf:.04,award:-.04,rep:-1}]
+  ]);
+  add(p.reputation>=30,'d48-transfer-collapse','❌','A transfer collapses at the last moment','A move you expected to complete has fallen apart before the deadline.',['Transfer drama','Deadline'],[
+    ['Fight for your place again','Improves selection and performance, lowers transfer interest',{apps:2,perf:.06,interest:-.16,rep:2}],
+    ['Demand another move','Massively raises transfer probability but destabilises form',{interest:.39,apps:-1,perf:-.025,variance:.10}],
+    ['Use the frustration as motivation','Boosts development and performance while keeping some interest',{dev:.14,perf:.055,interest:.08,rep:2}]
+  ]);
+  add(true,'d49-five-losses','🧯','Your team has lost five matches in a row','Confidence is low and someone needs to change the mood.',['Bad run','Team response'],[
+    ['Call a players’ meeting','Boosts team results, leadership and captaincy odds',{team:1.0,captain:.09,rep:3,perf:.035}],
+    ['Focus on yourself','Improves personal performance but less team impact',{perf:.06,team:.1}],
+    ['Ask the manager for changes','Can improve the team but adds tactical volatility',{team:.7,perf:.035,variance:.07,rep:1}]
+  ]);
+  add(att,'d50-more-selfish','🎯','Your manager tells you to play more selfishly','The staff want you closer to the decisive moments in attack.',['Attacking role','Tactical instruction'],[
+    ['Become the main threat','Raises award and performance upside with team trade-off',{perf:.065,award:.09,team:-.3,variance:.07}],
+    ['Keep creating for others','Boosts team results and consistency',{team:.85,perf:.05,variance:-.05}],
+    ['Find a balance','Solid all-round boost',{perf:.055,team:.45,award:.03}]
+  ]);
+  add(p.rating>=72,'d51-missed-squad','🏳️','You are left out of a major tournament squad','International rejection has become one of the biggest stories of your season.',['International football','Setback'],[
+    ['Use it as motivation','Boosts club performance and future international odds',{perf:.065,intl:.12,dev:.07,rep:2}],
+    ['Speak publicly about it','Raises profile and international pressure',{intl:.08,rep:3,variance:.09,perf:.015}],
+    ['Focus entirely on your club','Strong club consistency but smaller international push',{perf:.06,intl:-.04,variance:-.06,team:.35}]
+  ]);
+  add(p.rating>=70,'d52-national-position','🌐','Your national team wants you in a different position','The international coach has a different tactical plan for you than your club does.',['International role',p.nationality],[
+    ['Adapt for your country','Strong international and development upside',{intl:.15,dev:.12,perf:.025}],
+    ['Ask to play your club role','Better immediate performance, less international flexibility',{intl:.04,perf:.055,dev:.02}],
+    ['Learn both roles','Balanced long-term boost',{intl:.10,dev:.15,perf:.035}]
+  ]);
+  add(young&&p.reputation>=25,'d53-breakout-contract','📝','You are offered a new deal after your breakout season','The club wants to lock down your future before bigger teams arrive.',['Breakout season','Contract'],[
+    ['Sign immediately','Lowers transfer probability and improves stability',{interest:-.25,perf:.05,rep:1,team:.35}],
+    ['Demand superstar terms','Keeps transfer pressure high and raises profile',{interest:.18,rep:3,variance:.07,perf:.015}],
+    ['Wait for transfer interest','Strongly raises transfer probability',{interest:.31,rep:2,perf:.005}]
+  ]);
+  add(true,'d54-captain-injured','🫡','Your captain is injured before the biggest match','The dressing room needs someone to take responsibility.',['Leadership','Big match'],[
+    ['Take responsibility','Strong captaincy, team and reputation boost',{captain:.15,team:.85,rep:4,perf:.04}],
+    ['Keep your normal role','Protects personal consistency',{perf:.055,variance:-.05}],
+    ['Rally the dressing room quietly','Balanced leadership and team improvement',{captain:.09,team:.7,rep:2,perf:.035}]
+  ]);
+  add(true,'d55-famous-skill','✨','You are becoming famous for one particular skill','Opponents now prepare specifically for your strongest weapon.',['Player identity',p.position],[
+    ['Build your game around it','Raises performance ceiling and award upside, with predictability risk',{perf:.055,award:.06,variance:.08,dev:.05}],
+    ['Work on your weaknesses','Best development route with smaller immediate boost',{dev:.20,perf:.025,award:-.02}],
+    ['Become more unpredictable','Balanced development and performance upside',{dev:.12,perf:.05,variance:.03}]
+  ]);
+  add(highRep,'d56-built-around-you','🏗️','A manager promises to build the team around you','The project sounds perfect, but promises are easier to make than keep.',['Career project','Manager promise'],[
+    ['Commit long term','Lowers transfer interest and boosts role stability',{interest:-.23,apps:2,perf:.045,rep:2}],
+    ['Ask for proof first','Keeps transfer options open while protecting selection',{interest:.11,apps:1,perf:.035,rep:1}],
+    ['Keep your options open','Raises market activity but slightly destabilises focus',{interest:.27,perf:-.01,variance:.07}]
+  ]);
+  add(highRep,'d57-two-clubs','⚖️','Two clubs want you: one giant and one perfect tactical fit','The biggest badge and the best football fit are pulling in opposite directions.',['Transfer choice','Career fit'],[
+    ['Choose the bigger club','Very high transfer activity with selection risk',{interest:.36,rep:4,apps:-2,perf:.005,variance:.08}],
+    ['Choose the better fit','Strong transfer activity plus better selection and performance odds',{interest:.27,apps:2,perf:.055,rep:2}],
+    ['Stay where you are','Strongly lowers transfer probability and protects continuity',{interest:-.27,perf:.05,team:.35}]
+  ]);
+  add(true,'d58-need-goal','⏳','Your team needs a goal with ten minutes remaining','The match is slipping away and the final push needs a decision.',['Late-game pressure','Team attack'],[
+    ['Take every risk','Maximum attacking upside with major volatility',{perf:.07,award:.05,variance:.13,team:.15}],
+    ['Stay disciplined','Best team balance and consistency',{team:.75,perf:.05,variance:-.05}],
+    ['Demand the ball constantly','Raises personal impact and reputation with some team risk',{perf:.06,rep:2,award:.06,team:-.25,variance:.06}]
+  ]);
+  add(p.reputation>=38,'d59-best-season','🚀','You have just had the best season of your career','Your value has never been higher and every major decision feels possible.',['Career peak','Transfer market'],[
+    ['Chase an even bigger move','Massively raises transfer probability and reputation',{interest:.40,rep:4,perf:-.01,variance:.07}],
+    ['Stay and build a legacy','Strongly lowers transfer interest and boosts team/captaincy odds',{interest:-.30,team:.8,captain:.08,rep:3,perf:.04}],
+    ['Demand a new contract','Keeps some transfer pressure while boosting status',{interest:.13,rep:3,perf:.025}]
+  ]);
+  add(veteran,'d60-final-years','⌛','You are entering the final years of your career','There may only be a handful of seasons left to shape how your career is remembered.',['Veteran decision',`Age ${p.age}`],[
+    ['Chase one last major trophy','Raises transfer and team ambition with extra variance',{interest:.22,team:.9,rep:3,variance:.06}],
+    ['Return to a former club','Raises transfer probability and stabilises performance',{interest:.28,perf:.045,rep:3,variance:-.03}],
+    ['Stay and become a mentor','Lowers transfer interest while boosting leadership and team results',{interest:-.24,captain:.12,team:.75,rep:3,perf:.035}]
+  ]);
+  const recent=new Set((st.storyScenarioHistory||[]).slice(-10));
+  const fresh=pool.filter(x=>!recent.has(x.id));
+  return fresh.length>=4?fresh:pool;
+};
+const flBaseStoryModifier=storyModifier;
+storyModifier=function(st,choiceIndex){
+  const story=st.pendingStory,chosen=story?.choices?.[choiceIndex]||story?.choices?.[1],raw={...(chosen?.[2]||{})},sid=story?.id;
+  const out=flBaseStoryModifier(st,choiceIndex);
+  if(sid){st.storyScenarioHistory??=[];st.storyScenarioHistory.push(sid);st.storyScenarioHistory=st.storyScenarioHistory.slice(-20)}
+  if(out?.storyMeta)out.storyMeta.effectSummary=flDecisionEffectSummary(raw);
+  return out;
+};
+
 function maybeStory(st){if(st.pendingStory||st.ended)return null;const probability=modeInfo(st.mode).storyChance;if(!chance(st,probability))return null;const pool=scenarioPool(st);st.pendingStory=pick(st,pool);return st.pendingStory}
 function storyModifier(st,choiceIndex){
  const story=st.pendingStory;if(!story)return {};
  const c=story.choices[choiceIndex]||story.choices[1],raw={...(c[2]||{})};
- const base=(raw.perf||0)+(raw.dev||0)*.28+(raw.apps||0)*.018+(raw.rep||0)*.008+(raw.interest||0)*.08;
+ const base=(raw.perf||0)+(raw.dev||0)*.28+(raw.apps||0)*.018+(raw.rep||0)*.008+(raw.interest||0)*.08+(raw.team||0)*.035+(raw.captain||0)*.16+(raw.intl||0)*.12+(raw.award||0)*.10;
  const risk=Math.min(.28,.055+Math.abs(raw.variance||0)*.9+Math.abs(raw.perf||0)*.22+Math.abs(raw.dev||0)*.08);
  const luck=gaussian(st)*risk;
  const perfLuck=clamp(luck,-.24,.24);
  st.pendingStory=null;
  return {...raw,perf:(raw.perf||0)+perfLuck,dev:(raw.dev||0)+perfLuck*.34,apps:(raw.apps||0)+Math.round(perfLuck*5),storyText:`${story.title}: ${c[0]}`,storyMeta:{id:story.id,title:story.title,choice:c[0],hint:c[1],base:+base.toFixed(3),luck:+luck.toFixed(3),risk:+risk.toFixed(3)}}
 }
-function teamFinish(st,league,perf){const p=st.player;const scores=league.clubs.map(club=>{let score=clubRep(club)+gaussian(st)*5.4;if(club===p.club)score+=(p.rating-squadLevel(club))*.14+(perf-6.7)*4.2;return {club,score}}).sort((a,b)=>b.score-a.score);return scores.findIndex(x=>x.club===p.club)+1}
+function teamFinish(st,league,perf,mod={}){const p=st.player;const scores=league.clubs.map(club=>{let score=clubRep(club)+gaussian(st)*5.4;if(club===p.club)score+=(p.rating-squadLevel(club))*.14+(perf-6.7)*4.2+(mod.team||0);return {club,score}}).sort((a,b)=>b.score-a.score);return scores.findIndex(x=>x.club===p.club)+1}
 function generateSeasonMoments(st,s){const res=[];if(s.goals>0)res.push({icon:'⚽',title:s.goals>=20?'Goals flowed':'Found the net',text:`${s.goals} goal${s.goals===1?'':'s'} in ${s.apps} appearances.`});else if(['GK','CB','FB','DM'].includes(st.player.position))res.push({icon:'🧱',title:'Defensive contribution',text:`A ${s.avg.toFixed(2)} average rating reflected your work beyond goals and assists.`});else res.push({icon:'🧩',title:'Influence without goals',text:`You contributed through build-up and movement across ${s.apps} appearances.`});
  if(s.position===1)res.push({icon:'🏆',title:'Champions',text:`${s.club} won ${s.league}.`});else if(s.position<=4)res.push({icon:'🔥',title:'Strong league campaign',text:`${s.club} finished ${ordinal(s.position)} in ${s.league}.`});else if(s.position>=Math.max(leagueForClub(s.club).clubs.length-3,12))res.push({icon:'🛡️',title:'A difficult league season',text:`The club had to fight through a tough campaign and finished ${ordinal(s.position)}.`});else res.push({icon:'📊',title:'League position',text:`${s.club} finished ${ordinal(s.position)} in ${s.league}.`});
  if(s.ratingChange>=2)res.push({icon:'🚀',title:'Development jump',text:`Your overall rose by ${s.ratingChange} to ${st.player.rating}.`});else if(s.ratingChange<0)res.push({icon:'⏳',title:'The curve changes',text:`Your overall fell by ${Math.abs(s.ratingChange)} as your career moved into a later stage.`});else res.push({icon:'🎬',title:'Season banked',text:`Another ${s.apps} senior appearances were added to the career.`});return res}
 function maybeTrophies(st,s){const p=st.player,won=[];if(s.position===1)won.push(s.league);const info=clubInfo(p.club),rep=clubRep(p.club);for(const cup of (info?.cups||[]).slice(0,2)){const tierPenalty=(info?.tier||1)>1?.018:0;const prob=clamp(.018+(rep-55)*.0031+(s.avg-6.7)*.034-tierPenalty,.010,.225);if(chance(st,prob))won.push(cup)}
  const slots=Math.min(4,leagueForClub(p.club).clubs.length),qualified=info?.tier===1&&(st.lastSeason?(st.lastSeason.position<=slots||(st.lastSeason.trophies||[]).some(t=>/Champions League|Europa League/i.test(String(t)))):rep>=88);if(qualified){const form=Math.max(0,s.avg-6.7),elite=Math.max(0,rep-78),ucl=clamp(.025+elite*.0065+form*.060,.015,.280);if(chance(st,ucl))won.push('Champions League')}
  for(const t of won)p.career.trophies.push({year:st.year,name:t,club:p.club});return won}
-function maybeAwards(st,s){const p=st.player,aw=[],contrib=s.goals+s.assists;if(p.age<=21&&s.avg>=7.15&&s.apps>=20&&chance(st,.32))aw.push('Young Player of the Year');if(['ST','WG','AM'].includes(p.position)&&s.goals>=24&&chance(st,.50))aw.push('Golden Boot');if(s.avg>=7.45&&s.apps>=27&&chance(st,.22))aw.push('League Player of the Year');for(const a of aw)p.career.awards.push({year:st.year,name:a,club:p.club});return aw}
-function internationalSeason(st,s){const p=st.player;let caps=0,goals=0,trophy=null;if(p.rating>=68){const call=clamp(.10+(p.rating-68)*.042+(s.avg-6.7)*.16,0,.92);if(chance(st,call)){caps=rint(st,2,11);goals=Math.max(0,Math.round(caps*POSITION_RATES[p.position].g*.52*(.7+rand(st)*.75)));p.career.caps+=caps;p.career.intGoals+=goals}}
+function maybeAwards(st,s,mod={}){const p=st.player,aw=[],contrib=s.goals+s.assists,award=mod.award||0;if(p.age<=21&&s.avg>=7.15&&s.apps>=20&&chance(st,clamp(.32+award,0,.75)))aw.push('Young Player of the Year');if(['ST','WG','AM'].includes(p.position)&&s.goals>=24&&chance(st,clamp(.50+award,0,.88)))aw.push('Golden Boot');if(s.avg>=7.45&&s.apps>=27&&chance(st,clamp(.22+award,0,.68)))aw.push('League Player of the Year');for(const a of aw)p.career.awards.push({year:st.year,name:a,club:p.club});return aw}
+function internationalSeason(st,s,mod={}){const p=st.player;let caps=0,goals=0,trophy=null;if(p.rating>=68){const call=clamp(.10+(p.rating-68)*.042+(s.avg-6.7)*.16+(mod.intl||0),0,.97);if(chance(st,call)){caps=rint(st,2,11);goals=Math.max(0,Math.round(caps*POSITION_RATES[p.position].g*.52*(.7+rand(st)*.75)));p.career.caps+=caps;p.career.intGoals+=goals}}
  const endYear=st.year+1,worldCup=endYear>=2030&&endYear%4===2,euroNations=new Set(['England','Spain','Germany','Italy','France','Portugal','Netherlands','Scotland','Belgium','Denmark','Sweden','Norway','Croatia','Serbia']),euros=endYear>=2028&&endYear%4===0&&euroNations.has(p.nationality);if((worldCup||euros)&&caps>0&&p.rating>=76){const strength=NATIONAL_STRENGTH[p.nationality]||72,form=Math.max(0,s.avg-6.85),base=worldCup?.010:.014,prob=clamp(base+(strength-70)*.0048+(p.rating-78)*.0018+form*.055,.004,worldCup?.180:.210);if(chance(st,prob)){trophy=worldCup?'World Cup':'European Championship';p.career.trophies.push({year:st.year,name:trophy,club:p.nationality})}}return {caps,goals,trophy}}
 function developAttributes(st,delta){const p=st.player;normalizeAttributes(p);const keys=Object.keys(p.attributes),ageFactor=p.age<=23?1:p.age>=32?-.7:.35;for(const k of keys){let move=delta*.62+ageFactor*.15+gaussian(st)*.45;if(delta===0)move*=.35;p.attributes[k]=clamp(Math.round(p.attributes[k]+move),25,99)}
  const focus={GK:['keeping','reflexes','physical'],CB:['defending','physical','passing'],FB:['pace','defending','passing'],DM:['defending','passing','physical'],CM:['passing','dribbling','physical'],AM:['passing','dribbling','shooting'],WG:['pace','dribbling','shooting'],ST:['shooting','physical','pace']}[p.position];for(const k of focus)if(k in p.attributes&&delta>0)p.attributes[k]=clamp(p.attributes[k]+(chance(st,.35)?1:0),25,99)}
@@ -318,13 +676,13 @@ function clubTransferBudget(club,year=2026){const cp=clubProfile(club),rep=cp.re
 function financialLabel(budget){if(budget>=120e6)return 'Elite spending power';if(budget>=65e6)return 'Very strong';if(budget>=30e6)return 'Strong';if(budget>=12e6)return 'Moderate';return 'Limited'}
 function transferInterestReason(st,s,club,role){const p=st.player;if(p.age<=22&&p.potential>=p.rating+7)return 'Long-term upside and development potential';if(['ST','WG','AM'].includes(p.position)&&s.goals+s.assists>=25)return 'Outstanding attacking production this season';if(s.avg>=7.25)return 'Consistently high match performances';if(role==='Star Player')return 'Immediate first-team impact';if(p.captain&&p.age>=27)return 'Experience and leadership';return 'A realistic fit for the squad’s current level'}
 function isReserveClub(name){return /(^Jong | B$| Futures$|^Club NXT$)/.test(name)}
-function generateOffers(st,s,interestMod=0){const p=st.player;if(p.age>=34)return [];const current=clubProfile(p.club),perf=seasonPerformanceIndex(st,s),marketValue=playerMarketValue(st,s),base=.085+Math.max(0,p.rating-58)*.018+Math.max(0,s.avg-6.65)*.20+Math.max(0,perf)*.055+interestMod;if(!chance(st,clamp(base,.05,.76)))return [];let candidates=ALL_CLUBS.filter(x=>x.club!==p.club);if(p.age<18)candidates=candidates.filter(x=>x.country===current.country);const strongSeason=perf>=.85,eliteSeason=perf>=1.55,ambition=current.rep+(eliteSeason?10:strongSeason?6:2)+(p.age<=23&&p.potential>=84?3:0);candidates=candidates.filter(x=>{if(isReserveClub(x.club)&&p.age>22)return false;const rep=clubRep(x.club),level=squadLevel(x.club),gap=p.rating-level,budget=clubTransferBudget(x.club,st.year+1),need=(hash(x.club+'-'+p.position+'-'+(st.year+1))%100);if(budget<marketValue*.92)return false;if(need<23)return false;if(rep<current.rep-7||rep>Math.min(98,ambition+5))return false;if(gap<-9||gap>12)return false;if(rep>=95&&p.rating<80&&!(p.age<=22&&p.potential>=90&&eliteSeason))return false;if(rep>=90&&p.rating<75&&!(p.age<=21&&p.potential>=86&&strongSeason))return false;return true});if(!candidates.length)candidates=ALL_CLUBS.filter(x=>{if(x.club===p.club||(p.age<18&&x.country!==current.country)||(isReserveClub(x.club)&&p.age>22))return false;const budget=clubTransferBudget(x.club,st.year+1),rep=clubRep(x.club),gap=p.rating-squadLevel(x.club);return budget>=marketValue*.92&&rep>=current.rep-5&&rep<=Math.min(98,ambition+3)&&gap>=-7&&gap<=10});const scored=candidates.map(x=>{const rep=clubRep(x.club),level=squadLevel(x.club),need=(hash(x.club+'-'+p.position+'-'+(st.year+1))%100)/100,targetRep=clamp(ambition,48,98);return {...x,score:Math.abs(rep-targetRep)*1.05+Math.abs((p.rating-level)-1.5)*.8+(1-need)*3+rand(st)*3.2}}).sort((a,b)=>a.score-b.score);const count=st.mode==='original'?(chance(st,.55)?2:1):(st.mode==='express'?(chance(st,.24)?2:1):1),offers=[];for(const x of scored){if(offers.length>=count)break;if(offers.some(o=>o.club===x.club))continue;const budget=clubTransferBudget(x.club,st.year+1),negotiation=.94+rand(st)*.16,fee=Math.round(marketValue*negotiation/100000)*100000;if(fee>budget*.92)continue;const fake={...st,player:{...p,club:x.club}},role=roleAtClub(fake,x.club),fit=transferFitScore(st,x.club);offers.push({club:x.club,country:x.country,division:x.division,rep:clubRep(x.club),squad:squadLevel(x.club),fee,budget,feePct:Math.round(fee/budget*100),finance:financialLabel(budget),reason:transferInterestReason(st,s,x.club,role),role,fit,currency:'£'})}return offers}
+function generateOffers(st,s,interestMod=0){const p=st.player;if(p.age>=34)return [];const current=clubProfile(p.club),perf=seasonPerformanceIndex(st,s),marketValue=playerMarketValue(st,s),base=.085+Math.max(0,p.rating-58)*.018+Math.max(0,s.avg-6.65)*.20+Math.max(0,perf)*.055+(interestMod>=0?interestMod*1.35:interestMod*2.15);let transferProb=clamp(base,.05,.76);if(interestMod>=.30)transferProb=Math.max(transferProb,.72);else if(interestMod>=.16)transferProb=Math.max(transferProb,.52);if(interestMod<=-.25)transferProb=Math.min(transferProb,.12);else if(interestMod<=-.18)transferProb=Math.min(transferProb,.20);else if(interestMod<=-.10)transferProb=Math.min(transferProb,.34);if(!chance(st,transferProb))return [];let candidates=ALL_CLUBS.filter(x=>x.club!==p.club);if(p.age<18)candidates=candidates.filter(x=>x.country===current.country);const strongSeason=perf>=.85,eliteSeason=perf>=1.55,ambition=current.rep+(eliteSeason?10:strongSeason?6:2)+(p.age<=23&&p.potential>=84?3:0);candidates=candidates.filter(x=>{if(isReserveClub(x.club)&&p.age>22)return false;const rep=clubRep(x.club),level=squadLevel(x.club),gap=p.rating-level,budget=clubTransferBudget(x.club,st.year+1),need=(hash(x.club+'-'+p.position+'-'+(st.year+1))%100);if(budget<marketValue*.92)return false;if(need<23)return false;if(rep<current.rep-7||rep>Math.min(98,ambition+5))return false;if(gap<-9||gap>12)return false;if(rep>=95&&p.rating<80&&!(p.age<=22&&p.potential>=90&&eliteSeason))return false;if(rep>=90&&p.rating<75&&!(p.age<=21&&p.potential>=86&&strongSeason))return false;return true});if(!candidates.length)candidates=ALL_CLUBS.filter(x=>{if(x.club===p.club||(p.age<18&&x.country!==current.country)||(isReserveClub(x.club)&&p.age>22))return false;const budget=clubTransferBudget(x.club,st.year+1),rep=clubRep(x.club),gap=p.rating-squadLevel(x.club);return budget>=marketValue*.92&&rep>=current.rep-5&&rep<=Math.min(98,ambition+3)&&gap>=-7&&gap<=10});const scored=candidates.map(x=>{const rep=clubRep(x.club),level=squadLevel(x.club),need=(hash(x.club+'-'+p.position+'-'+(st.year+1))%100)/100,targetRep=clamp(ambition,48,98);return {...x,score:Math.abs(rep-targetRep)*1.05+Math.abs((p.rating-level)-1.5)*.8+(1-need)*3+rand(st)*3.2}}).sort((a,b)=>a.score-b.score);const count=st.mode==='original'?(chance(st,.55)?2:1):(st.mode==='express'?(chance(st,.24)?2:1):(interestMod>=.30?(chance(st,.55)?3:2):interestMod>=.16?(chance(st,.48)?2:1):1)),offers=[];for(const x of scored){if(offers.length>=count)break;if(offers.some(o=>o.club===x.club))continue;const budget=clubTransferBudget(x.club,st.year+1),negotiation=.94+rand(st)*.16,fee=Math.round(marketValue*negotiation/100000)*100000;if(fee>budget*.92)continue;const fake={...st,player:{...p,club:x.club}},role=roleAtClub(fake,x.club),fit=transferFitScore(st,x.club);offers.push({club:x.club,country:x.country,division:x.division,rep:clubRep(x.club),squad:squadLevel(x.club),fee,budget,feePct:Math.round(fee/budget*100),finance:financialLabel(budget),reason:transferInterestReason(st,s,x.club,role),role,fit,currency:'£'})}return offers}
 function acceptOffer(st,index){const o=st.pendingOffers[index];if(!o)return false;if(st===state)window.flTrack?.('Transfer Accepted');const from=st.player.club;st.player.club=o.club;st.player.clubYears=0;st.player.captain=false;st.transfers.push({year:st.year,from,to:o.club,fee:o.fee,type:'Transfer'});st.news.unshift({icon:'✈️',title:'Transfer complete',text:`${st.player.name} leaves ${from} for ${o.club} in a ${money(o.fee,o.currency||'£')} move.`});st.pendingOffers=[];st.pendingStory=null;return true}
 function stayPut(st){if(st.pendingOffers.length)st.news.unshift({icon:'🤝',title:'Staying put',text:`${st.player.name} turns down interest to remain at ${st.player.club}.`});st.pendingOffers=[]}
 function shouldRetire(st){const p=st.player;return p.age>=p.retirementAge||(p.age>=34&&p.rating<=55&&chance(st,.28))}
-function simulateSeason(st,storyChoiceIndex=null){if(st.ended||st.pendingOffers.length)return null;let mod=st.queuedStoryMod||{};st.queuedStoryMod=null;if(st.pendingStory)mod=storyModifier(st,storyChoiceIndex==null?1:storyChoiceIndex);const p=st.player,league=leagueForClub(p.club);if(!league)throw new Error('No league for '+p.club);const role=roleAtClub(st),ranges={'Star Player':[34,43],'Regular Starter':[28,40],'Rotation Player':[15,31],'Prospect':[5,21]},ar=ranges[role];let apps=clamp(rint(st,ar[0],ar[1])+(mod.apps||0),1,48);if(p.age>=33)apps=Math.max(8,apps-rint(st,0,5));const level=squadLevel(p.club),talent=(p.rating-level)/18,variance=Math.max(-.12,mod.variance||0),perfBase=6.58+talent*.22+(mod.perf||0)+gaussian(st)*(.18+Math.max(0,variance));const rate=POSITION_RATES[p.position],minutes=apps/38,quality=clamp(.72+(p.rating-55)/70,.58,1.35),form=clamp(.88+(perfBase-6.5)*.22,.72,1.18);let goals=Math.max(0,Math.round(38*rate.g*minutes*quality*form*(.72+rand(st)*.56))),assists=Math.max(0,Math.round(38*rate.a*minutes*quality*form*(.72+rand(st)*.56)));if(p.position==='GK'){goals=chance(st,.012)?1:0;assists=chance(st,.07)?1:0}let avg=clamp(perfBase+(goals+assists)/Math.max(20,apps)*.16,5.75,8.45);avg=+avg.toFixed(2);const position=teamFinish(st,league,avg),s={label:currentSeasonLabel(st),year:st.year,club:p.club,league:league.name,role,apps,goals,assists,avg,position,startRating:p.rating,trophies:[],awards:[],caps:0,intGoals:0,story:mod.storyText||null};
- p.career.apps+=apps;p.career.goals+=goals;p.career.assists+=assists;p.clubYears++;s.trophies=maybeTrophies(st,s);const intl=internationalSeason(st,s);s.caps=intl.caps;s.intGoals=intl.goals;if(intl.trophy)s.trophies.push(intl.trophy);s.awards=maybeAwards(st,s);s.ratingChange=development(st,s,mod);p.reputation=clamp(p.reputation+Math.round((avg-6.6)*7+s.trophies.length*4+s.awards.length*5+(mod.rep||0)),5,100);if(!p.captain&&p.age>=26&&p.clubYears>=3&&p.rating>=level+3&&chance(st,.20)){p.captain=true;st.news.unshift({icon:'©️',title:'Named captain',text:`${p.club} hand ${p.name} the captain's armband.`})}s.moments=generateSeasonMoments(st,s);st.history.push(s);if(st===state)window.flTrack?.('Season Completed');st.lastSeason=s;st.news.unshift({icon:s.position===1?'🏆':'📊',title:`${s.label} complete`,text:`${p.club}: ${ordinal(position)} • ${apps} apps • ${goals} goals • ${assists} assists • ${avg.toFixed(2)} avg.`});st.news=st.news.slice(0,14);p.age++;st.year++;st.pendingOffers=generateOffers(st,s,mod.interest||0);
- if(mod.storyMeta){const expected=6.58+((s.startRating-level)/18)*.22,perfDelta=s.avg-expected,roleMid=(ar[0]+ar[1])/2,appsDelta=(s.apps-roleMid)/Math.max(8,(ar[1]-ar[0])),offerEffect=(mod.interest||0)*(st.pendingOffers.length?1.2:.45);const score=perfDelta*.9+s.ratingChange*.20+appsDelta*.24+offerEffect+(mod.storyMeta.luck||0)*1.3;const verdict=score>=.48?'Paid off':score>=.12?'Helped':score>-.16?'Mixed':score>-.48?'Backfired':'Backfired badly';const tone=score>=.12?'positive':score>-.16?'mixed':'negative';const direction=mod.storyMeta.base>=.12?'gave you better odds':mod.storyMeta.base<=-.12?'made the season riskier':'changed the balance of the season';const detail=`${mod.storyMeta.choice} ${direction}. Result: ${s.avg.toFixed(2)} average, ${s.apps} apps and ${s.ratingChange>0?'+'+s.ratingChange:s.ratingChange} OVR${st.pendingOffers.length?`, plus ${st.pendingOffers.length} transfer offer${st.pendingOffers.length===1?'':'s'}`:''}.`;s.scenarioImpact={title:mod.storyMeta.title,choice:mod.storyMeta.choice,verdict,tone,detail,score:+score.toFixed(2)};st.news.unshift({icon:tone==='positive'?'✅':tone==='negative'?'⚠️':'↔️',title:`Decision result: ${verdict}`,text:`${mod.storyMeta.title} — ${detail}`})}
+function simulateSeason(st,storyChoiceIndex=null){if(st.ended||st.pendingOffers.length)return null;let mod=st.queuedStoryMod||{};st.queuedStoryMod=null;if(st.pendingStory)mod=storyModifier(st,storyChoiceIndex==null?1:storyChoiceIndex);const p=st.player,league=leagueForClub(p.club);if(!league)throw new Error('No league for '+p.club);const role=roleAtClub(st),ranges={'Star Player':[34,43],'Regular Starter':[28,40],'Rotation Player':[15,31],'Prospect':[5,21]},ar=ranges[role];let apps=clamp(rint(st,ar[0],ar[1])+(mod.apps||0),1,48);if(p.age>=33)apps=Math.max(8,apps-rint(st,0,5));const level=squadLevel(p.club),talent=(p.rating-level)/18,variance=Math.max(-.12,mod.variance||0),perfBase=6.58+talent*.22+(mod.perf||0)+gaussian(st)*(.18+Math.max(0,variance));const rate=POSITION_RATES[p.position],minutes=apps/38,quality=clamp(.72+(p.rating-55)/70,.58,1.35),form=clamp(.88+(perfBase-6.5)*.22,.72,1.18);let goals=Math.max(0,Math.round(38*rate.g*minutes*quality*form*(.72+rand(st)*.56))),assists=Math.max(0,Math.round(38*rate.a*minutes*quality*form*(.72+rand(st)*.56)));if(p.position==='GK'){goals=chance(st,.012)?1:0;assists=chance(st,.07)?1:0}let avg=clamp(perfBase+(goals+assists)/Math.max(20,apps)*.16,5.75,8.45);avg=+avg.toFixed(2);const position=teamFinish(st,league,avg,mod),s={label:currentSeasonLabel(st),year:st.year,club:p.club,league:league.name,role,apps,goals,assists,avg,position,startRating:p.rating,trophies:[],awards:[],caps:0,intGoals:0,story:mod.storyText||null,decisionInterest:Number(mod.interest||0),decisionEffects:{team:Number(mod.team||0),captain:Number(mod.captain||0),intl:Number(mod.intl||0),award:Number(mod.award||0)}};
+ p.career.apps+=apps;p.career.goals+=goals;p.career.assists+=assists;p.clubYears++;s.trophies=maybeTrophies(st,s);const intl=internationalSeason(st,s,mod);s.caps=intl.caps;s.intGoals=intl.goals;if(intl.trophy)s.trophies.push(intl.trophy);s.awards=maybeAwards(st,s,mod);s.ratingChange=development(st,s,mod);p.reputation=clamp(p.reputation+Math.round((avg-6.6)*7+s.trophies.length*4+s.awards.length*5+(mod.rep||0)),5,100);if(!p.captain&&p.age>=26&&p.clubYears>=3&&p.rating>=level+3&&chance(st,clamp(.20+(mod.captain||0),.02,.72))){p.captain=true;st.news.unshift({icon:'©️',title:'Named captain',text:`${p.club} hand ${p.name} the captain's armband.`})}s.moments=generateSeasonMoments(st,s);st.history.push(s);if(st===state)window.flTrack?.('Season Completed');st.lastSeason=s;st.news.unshift({icon:s.position===1?'🏆':'📊',title:`${s.label} complete`,text:`${p.club}: ${ordinal(position)} • ${apps} apps • ${goals} goals • ${assists} assists • ${avg.toFixed(2)} avg.`});st.news=st.news.slice(0,14);p.age++;st.year++;st.pendingOffers=generateOffers(st,s,mod.interest||0);
+ if(mod.storyMeta){const expected=6.58+((s.startRating-level)/18)*.22,perfDelta=s.avg-expected,roleMid=(ar[0]+ar[1])/2,appsDelta=(s.apps-roleMid)/Math.max(8,(ar[1]-ar[0])),offerEffect=(mod.interest||0)*(st.pendingOffers.length?1.2:.45);const score=perfDelta*.9+s.ratingChange*.20+appsDelta*.24+offerEffect+(mod.storyMeta.luck||0)*1.3;const verdict=score>=.48?'Paid off':score>=.12?'Helped':score>-.16?'Mixed':score>-.48?'Backfired':'Backfired badly';const tone=score>=.12?'positive':score>-.16?'mixed':'negative';const direction=mod.storyMeta.base>=.12?'gave you better odds':mod.storyMeta.base<=-.12?'made the season riskier':'changed the balance of the season';const mechanics=mod.storyMeta.effectSummary?` Direct effects: ${mod.storyMeta.effectSummary}.`:'';const detail=`${mod.storyMeta.choice} ${direction}.${mechanics} Result: ${s.avg.toFixed(2)} average, ${s.apps} apps and ${s.ratingChange>0?'+'+s.ratingChange:s.ratingChange} OVR${st.pendingOffers.length?`, plus ${st.pendingOffers.length} transfer offer${st.pendingOffers.length===1?'':'s'}`:''}.`;s.scenarioImpact={title:mod.storyMeta.title,choice:mod.storyMeta.choice,verdict,tone,detail,score:+score.toFixed(2)};st.news.unshift({icon:tone==='positive'?'✅':tone==='negative'?'⚠️':'↔️',title:`Decision result: ${verdict}`,text:`${mod.storyMeta.title} — ${detail}`})}
  if(shouldRetire(st)){st.ended=true;if(st===state)window.flTrack?.('Career Completed');st.pendingOffers=[];st.pendingStory=null;st.news.unshift({icon:'🏟️',title:'A career closes',text:`${p.name} retires at age ${p.age} after ${st.history.length} professional seasons.`})}else if(!st.pendingOffers.length)maybeStory(st);return s}
 function careerScore(st){const p=st.player,c=p.career,ballons=c.awards.filter(x=>x.name==="Ballon d'Or").length,major=c.trophies.filter(x=>['Champions League','World Cup'].includes(x.name)).length;let score=8+(p.peak-55)*.92+Math.min(18,c.apps/42)+Math.min(12,(c.goals+c.assists)/45)+Math.min(16,c.trophies.length*2.3+major*3.2)+Math.min(18,c.awards.length*2.3+ballons*5)+Math.min(8,c.caps/13);return clamp(Math.round(score),0,100)}
 function legacyLabel(score){if(score>=96)return 'Immortal';if(score>=90)return 'All-Time Great';if(score>=82)return 'World Class';if(score>=72)return 'Elite Career';if(score>=60)return 'Top Professional';if(score>=48)return 'Respected Pro';return 'Journeyman'}
@@ -957,7 +1315,7 @@ function recordTargets(club){return {apps:240+hash(club+'-apps')%161,goals:92+ha
 function updateRecords(st,s){const p=st.player,c=p.career;ensureV6(st);const totals=p.clubTotals[s.club]||(p.clubTotals[s.club]={apps:0,goals:0,assists:0});totals.apps+=s.apps;totals.goals+=s.goals;totals.assists+=s.assists;s.recordsBroken=[];const targets=recordTargets(s.club),labels={apps:'appearance record',goals:'goals record',assists:'assist record'};for(const key of Object.keys(targets)){const id=`${s.club}|${key}`;if(totals[key]>=targets[key]&&!c.records.some(x=>x.id===id)){const record={id,year:s.year,club:s.club,type:key,label:labels[key],value:totals[key],target:targets[key]};c.records.push(record);s.recordsBroken.push(record);st.news.unshift({icon:'📜',title:'Club record broken',text:`${p.name} breaks ${s.club}’s ${labels[key]} with ${totals[key]}.`})}}if(s.recordsBroken.length)s.awards.unshift(`CLUB RECORD • ${s.recordsBroken.map(x=>x.label.replace(' record','')).join(' & ')}`)}
 function relaxedOffer(st,s){const p=st.player,current=clubProfile(p.club),perf=seasonPerformanceIndex(st,s),exportLeague=['Denmark','Norway','Sweden','Belgium','Netherlands','Portugal','Austria','Switzerland','Croatia','Serbia','Czechia'].includes(current.country),worthy=s.avg>=6.88&&s.apps>=18||perf>=.48||p.rating>=72;if(!worthy)return [];const roll=clamp(.08+Math.max(0,s.avg-6.75)*.12+Math.max(0,perf)*.035+(exportLeague?.12:0),.08,.42);if(!chance(st,roll))return [];const value=playerMarketValue(st,s),top=current.rep+(perf>=1.5?18:perf>=.7?12:7),pool=ALL_CLUBS.filter(x=>x.club!==p.club&&(!isReserveClub(x.club)||p.age<=22)&&(p.age>=18||x.country===current.country)).filter(x=>{const rep=clubRep(x.club),gap=p.rating-squadLevel(x.club);return rep>=current.rep-10&&rep<=Math.min(98,top)&&gap>=-10&&gap<=14&&clubTransferBudget(x.club,st.year+1)>=value*.68}).map(x=>({...x,score:Math.abs(clubRep(x.club)-(current.rep+Math.max(2,perf*5)))+rand(st)*5})).sort((a,b)=>a.score-b.score);const out=[];for(const x of pool.slice(0,exportLeague&&perf>=.9?2:1)){const budget=clubTransferBudget(x.club,st.year+1),fee=Math.round(Math.min(value*(.88+rand(st)*.18),budget*.88)/100000)*100000,fake={...st,player:{...p,club:x.club}},role=roleAtClub(fake,x.club);out.push({club:x.club,country:x.country,division:x.division,rep:clubRep(x.club),squad:squadLevel(x.club),fee,budget,feePct:Math.round(fee/budget*100),finance:financialLabel(budget),reason:transferInterestReason(st,s,x.club,role),role,fit:transferFitScore(st,x.club),currency:'£'})}return out}
 generateOffers=function(st,s,interest=0){const first=BaseOffers(st,s,interest);return first.length?first:relaxedOffer(st,s)};
-simulateSeason=function(st,choice=null){ensureV6(st);const s=BaseSimulate(st,choice);if(!s)return s;historicSeason(st,s);updateRecords(st,s);if(!st.ended&&!st.pendingOffers.length)st.pendingOffers=generateOffers(st,s,.04);return s};
+simulateSeason=function(st,choice=null){ensureV6(st);const s=BaseSimulate(st,choice);if(!s)return s;historicSeason(st,s);updateRecords(st,s);const di=Number(s.decisionInterest||0);if(!st.ended&&!st.pendingOffers.length&&di>-.10)st.pendingOffers=generateOffers(st,s,di||.04);return s};
 careerScore=function(st){ensureV6(st);const p=st.player,c=p.career,seasons=st.history?.length||0,peak=p.peak||p.rating,major=c.trophies.filter(x=>/Champions League|World Cup|European Championship|Copa Libertadores/i.test(x.name||x)).length,ballons=c.awards.filter(x=>(x.name||x)==="Ballon d'Or").length,records=c.records?.length||0,ga=(c.goals||0)+(c.assists||0),outputTarget=p.position==='GK'?80:['CB','FB','DM'].includes(p.position)?260:p.position==='CM'?500:900;const ability=clamp((peak-58)/38*20,0,20),longevity=clamp((c.apps||0)/850*10,0,10)+clamp(seasons/23*4,0,4),output=p.position==='GK'?clamp((c.apps||0)/850*18,0,18):clamp(ga/outputTarget*18,0,18),team=clamp((c.trophies.length*1.05+major*1.75),0,16),individual=clamp(c.awards.length*.9+ballons*3.0,0,18),international=clamp((c.caps||0)/120*6+Math.min(2,c.trophies.filter(x=>/World Cup|European Championship/i.test(x.name||x)).length*2),0,8),recordScore=clamp(records*2.2,0,6),raw=ability+longevity+output+team+individual+international+recordScore;const immortal=peak>=96&&(c.apps||0)>=750&&major>=4&&ballons>=3&&c.awards.length>=10&&c.trophies.length>=14&&records>=1&&raw>=96;return immortal?100:clamp(Math.round(raw),0,99)};
 legacyLabel=function(score){if(score===100)return 'Football Immortal';if(score>=94)return 'Historic Great';if(score>=86)return 'World Great';if(score>=76)return 'World Class';if(score>=64)return 'Elite Career';if(score>=50)return 'Outstanding Professional';if(score>=36)return 'Respected Professional';return 'A Career Earned'};
 playerRevealHtml=function(st){ensureV6(st);const p=st.player,m=modeInfo(st.mode),cp=clubProfile(p.club),rc=rarityClass(p);return `<div class="eyebrow">SCOUTING REPORT • ${esc(m.name)}</div><h2>${esc(p.name)}</h2><p>Your career profile is being revealed.</p><div class="playerReveal ${rc}"><div class="bigOvr"><strong>${p.rating}</strong><small>OVERALL</small></div><div class="revealInfo"><div class="eyebrow">${esc(p.nationality)} • ${p.position}</div><h3>${esc(p.club)}</h3><div class="rarityBadge"><i></i>${esc(p.rarity)} • ${p.chancePct}% profile</div><div class="pillRow"><span class="pill">Age ${p.age}</span><span class="pill">${esc(p.archetype)}</span><span class="pill">Potential ${p.potential} <span class="dynamicTag">DYNAMIC</span></span></div></div></div><div class="actions"><button class="primary" id="beginCareerBtn">Begin Quick Story</button><button class="secondary" id="rerollBtn">New player</button><button class="secondary" id="backModes">Compare modes</button></div>`};
@@ -1427,10 +1785,13 @@ function v1047OfferRetention(st,s){
  return clamp(keep,.012,.96);
 }
 generateOffers=function(st,s,interest=0){
- const offers=V1047BaseOffers(st,s,interest)||[];if(!offers.length)return offers;
- if(!chance(st,v1047OfferRetention(st,s)))return [];
+ let offers=V1047BaseOffers(st,s,interest)||[];if(!offers.length&&interest>=.25)offers=V1047BaseOffers(st,s,interest+.22)||[];else if(!offers.length&&interest>=.16)offers=V1047BaseOffers(st,s,interest+.10)||[];if(!offers.length&&interest>=.16&&chance(st,interest>=.30?.90:.68)){const forced=flDecisionTransferFallback(st,s);if(forced)offers=[forced]}if(!offers.length)return offers;
+ let keep=v1047OfferRetention(st,s);
+ if(interest>=.30)keep=Math.max(keep,.88);else if(interest>=.16)keep=Math.max(keep,.70);
+ if(interest<=-.25)keep=Math.min(keep,.08);else if(interest<=-.18)keep=Math.min(keep,.16);else if(interest<=-.10)keep=Math.min(keep,.30);
+ if(!chance(st,keep))return [];
  /* Multiple bids should feel like a genuine hot market, not the default every summer. */
- return offers.length>1&&chance(st,.28)?offers.slice(0,2):offers.slice(0,1);
+ const multi=interest>=.30?.62:interest>=.16?.44:.28;return offers.length>1&&chance(st,multi)?offers.slice(0,2):offers.slice(0,1);
 };
 acceptOffer=function(st,index){
  const ok=V1047BaseAccept(st,index);if(ok&&st?.player){const p=st.player;p.v1047LastTransferYear=st.year;p.v1047LoyaltyUntilYear=0;p.v1047RejectedOffers=0;p.v8NoOfferStreak=0;p.v9NoOfferStreak=0}return ok;
@@ -1485,10 +1846,10 @@ maybeTrophies=function(st,s){
  return won;
 };
 function localAwardProb(base,s,boost=0){return clamp(base+Math.max(0,Number(s.avg)-7)*.62+boost,.02,.82)}
-maybeAwards=function(st,s){
+maybeAwards=function(st,s,mod={}){
  if(st.mode!=='story')return [];
  const p=st.player,c=ctx(st,s),contrib=(s.goals||0)+(s.assists||0),attack=['ST','WG','AM'].includes(p.position),mid=['AM','CM','DM'].includes(p.position),def=['CB','FB','DM'].includes(p.position),champ=Number(s.position)===1,ucl=(s.trophies||[]).includes('Champions League'),intl=(s.trophies||[]).some(x=>/World Cup|European Championship/i.test(String(x))),out=[];
- const add=(name,ok,prob,priority)=>{if(ok&&chance(st,clamp(prob,.005,.90)))out.push({name,priority})};
+ const add=(name,ok,prob,priority)=>{if(ok&&chance(st,clamp(prob+(Number(mod.award)||0),.005,.94)))out.push({name,priority})};
  /* Club and league honours can happen at any level, but only within that competition. */
  add(`${p.club} Player of the Season`,s.apps>=20&&s.avg>=6.98,localAwardProb(.20,s,.03),38);
  add(`${p.club} Supporters’ Player of the Season`,s.apps>=22&&s.avg>=7.03,localAwardProb(.14,s,.02),40);
