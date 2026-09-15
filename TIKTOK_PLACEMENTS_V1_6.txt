@@ -1,0 +1,8 @@
+Football Legacy TikTok placement V1.6
+
+Launch screen corrected exactly as requested:
+- PLAY button remains in its original position.
+- FREE BROWSER CAREER SIMULATOR text is below PLAY.
+- TikTok follow bar is pinned to the bottom of the screen, below the free-browser text.
+- The TikTok bar keeps the compact black design with real logo, handle and white FOLLOW button.
+- Other TikTok placements and all gameplay/decision logic are unchanged.
