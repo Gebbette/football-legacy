@@ -1,0 +1,11 @@
+Football Legacy TikTok placements V1.5
+
+Corrected the TikTok bar to match the supplied reference exactly in structure:
+- pure black, flat compact bar
+- real TikTok logo on the left
+- 'TikTok' as the main label
+- @football.legacy.game underneath
+- white FOLLOW button on the right
+- directly underneath the original PLAY button
+- same compact treatment for multiplayer, new career and career-share placements
+- no decision or gameplay logic changed

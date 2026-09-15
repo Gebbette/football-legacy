@@ -12,4 +12,21 @@
 .mpFinalActions .mpLeave{min-width:120px}
 @media(max-width:620px){.mpLobbyHead,.mpGameTop{align-items:flex-start}.mpHeaderActions{max-width:48%;flex-direction:column;align-items:stretch}.mpHeaderActions .mpRoomCode{width:100%}.mpSessionActions{width:100%}.mpSessionActions .mpLeave{width:100%}.mpFinalActions{grid-template-columns:1fr}.mpFinalActions .mpLeave{width:100%}}
 
-.mpTikTok{display:flex;align-items:center;gap:9px;width:min(560px,calc(100% - 24px));margin:0 auto 12px;padding:8px 10px;border-radius:10px;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;text-decoration:none;min-height:46px}.mpTikTok img{width:23px;height:23px;flex:0 0 23px}.mpTikTok span{display:grid;gap:1px;min-width:0}.mpTikTok b{font-size:10px;line-height:1.2}.mpTikTok small{font-size:8.5px;color:rgba(255,255,255,.64);line-height:1.25}.mpTikTok em{margin-left:auto;flex:none;font-style:normal;font-size:8px;font-weight:1000;letter-spacing:.05em;padding:5px 7px;border-radius:7px;background:#fff;color:#000}.mpTikTok:hover,.mpTikTok:focus-visible{border-color:rgba(255,255,255,.3)}
+/* Football Legacy TikTok exact compact treatment V1.5 */
+.mpTikTok.fl-tiktok-compact{
+  display:flex!important;align-items:center!important;gap:10px!important;
+  width:100%!important;box-sizing:border-box!important;
+  min-height:50px!important;padding:8px 10px!important;
+  margin-top:18px!important;border-radius:11px!important;
+  background:#000!important;border:1px solid rgba(255,255,255,.14)!important;
+  color:#fff!important;text-decoration:none!important;box-shadow:none!important;
+}
+.mpTikTok.fl-tiktok-compact img{width:26px!important;height:26px!important;flex:0 0 26px!important}
+.mpTikTok.fl-tiktok-compact .fl-tiktok-compact-copy{display:grid!important;gap:1px!important;min-width:0!important;text-align:left!important}
+.mpTikTok.fl-tiktok-compact .fl-tiktok-compact-copy b{font-size:13px!important;line-height:1.08!important}
+.mpTikTok.fl-tiktok-compact .fl-tiktok-compact-copy small{font-size:10px!important;line-height:1.2!important;color:rgba(255,255,255,.62)!important}
+.mpTikTok.fl-tiktok-compact .fl-tiktok-compact-cta{
+  margin-left:auto!important;flex:none!important;padding:7px 11px!important;
+  border-radius:9px!important;background:#fff!important;color:#000!important;
+  font-size:10px!important;font-weight:950!important;letter-spacing:.05em!important;
+}
