@@ -211,7 +211,7 @@ function createCareer(seedText,mode='express'){
  const seed=String(seedText||('FL-'+Date.now())),st={version:4,seed,mode:MODE_INFO[mode]?mode:'express',rng:hash(seed),year:2026,history:[],transfers:[],news:[],pendingOffers:[],pendingStory:null,lastSeason:null,ended:false,createdAt:Date.now(),settings:{motion:true}};
  const nationality=pick(st,NATIONALITY_WEIGHTS),arch=weighted(st,ARCHETYPES),position=pick(st,POSITIONS),age=rint(st,16,18),rating=rint(st,arch.start[0],arch.start[1]),potential=rint(st,Math.max(rating+8,arch.pot[0]),arch.pot[1]),name=randomName(st,nationality),club=chooseStartClub(st,nationality,rating,arch);
  st.player={name,nationality,position,age,rating,potential,originalPotential:potential,potentialHistory:[{year:2026,value:potential}],peak:rating,archetype:arch.name,rarity:arch.rarity,chancePct:arch.chancePct,growth:arch.growth,volatility:arch.volatility||0,lateBloom:arch.lateBloom||0,historicProfile:arch.historic||0,club,retirementAge:rint(st,35,39),career:{apps:0,goals:0,assists:0,caps:0,intGoals:0,trophies:[],awards:[],records:[]},clubTotals:{},reputation:10,captain:false,clubYears:0,attributes:deriveAttributes(st,rating,position)};
- st.transfers.push({year:2026,from:null,to:club,fee:0,type:'Academy breakthrough'});st.news.unshift({icon:'🌱',title:'The journey begins',text:`${name} signs a first professional deal with ${club}.`});return st
+ st.transfers.push({year:2026,from:null,to:club,fee:0,type:'Academy breakthrough'});st.news.unshift({icon:'🌱',title:'The journey begins',text:`${name} signs a first professional deal with ${club}.`});if(st.mode==='story')maybeStory(st);return st
 }
 
 function scenarioPool(st){const p=st.player,role=roleAtClub(st),pool=[];
@@ -585,7 +585,13 @@ storyModifier=function(st,choiceIndex){
   return out;
 };
 
-function maybeStory(st){if(st.pendingStory||st.ended)return null;const probability=modeInfo(st.mode).storyChance;if(!chance(st,probability))return null;const pool=scenarioPool(st);st.pendingStory=pick(st,pool);return st.pendingStory}
+function maybeStory(st){if(st.pendingStory||st.ended)return null;const probability=st.mode==='story'?1:modeInfo(st.mode).storyChance;if(!chance(st,probability))return null;const pool=scenarioPool(st);if(!pool.length)return null;st.pendingStory=pick(st,pool);return st.pendingStory}
+
+/* DECISION HOTFIX V1.2: Quick Story always has a real rotating decision before every season. */
+function flDecisionPoolHealth(st){
+  const pool=scenarioPool(st);
+  return {count:pool.length,unique:new Set(pool.map(x=>x.id)).size};
+}
 function storyModifier(st,choiceIndex){
  const story=st.pendingStory;if(!story)return {};
  const c=story.choices[choiceIndex]||story.choices[1],raw={...(c[2]||{})};

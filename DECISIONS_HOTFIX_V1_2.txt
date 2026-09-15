@@ -1,0 +1,9 @@
+FOOTBALL LEGACY — DECISION HOTFIX V1.2
+======================================
+- Quick Story now creates a decision immediately at career start.
+- Quick Story now guarantees a fresh decision before every season instead of using a 66% roll.
+- The full expanded 60-scenario pack remains active and context-aware.
+- Recent-scenario memory still prevents constant repeats.
+- Decision effects on transfers, appearances, development, performance, reputation, team results, captaincy, internationals and awards are preserved.
+- TikTok promo moved off the launch screen to a smaller flat #000 banner at the bottom of the homepage.
+- TikTok promo now uses a real TikTok-note SVG glyph, not the temporary music-note approximation.
