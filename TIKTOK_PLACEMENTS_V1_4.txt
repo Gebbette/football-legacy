@@ -1,12 +1,9 @@
-FOOTBALL LEGACY — TIKTOK PLACEMENTS V1.4
-========================================
-TikTok: @football.legacy.game
+Football Legacy TikTok placements V1.4
 
-Visible placements:
-1. Compact flat black TikTok bar directly underneath the original opening PLAY button.
-2. Flat black TikTok bar at the bottom of the Multiplayer page.
-3. Flat black TikTok bar on the new-career/start-career screen in Quick Story, Career Express and Original Career.
-4. TikTok share bar directly beside the completed-career share area in all three single-player modes.
-5. Existing subtle homepage/footer references retained.
+Added / confirmed TikTok follow areas in the exact requested places:
+1. Opening launch screen: directly under the main PLAY button.
+2. Multiplayer page: at the bottom of the intro / room-entry screen.
+3. New career start screens: under the Start Career / Begin Career button in Quick Story, Career Express and Original Career.
+4. Final career share area: kept under the Share career / Copy result buttons.
 
-The expanded Quick Story decision hotfix is preserved.
+Handle: @football.legacy.game
