@@ -1,0 +1,10 @@
+FOOTBALL LEGACY — TIKTOK PLACEMENTS V1.3
+
+Kept intentionally restrained:
+- Existing flat pure-black TikTok banner remains near the bottom of the main homepage.
+- Added a simple TikTok text link to the homepage footer.
+- Added a small TikTok link to the footer of Quick Story, Career Express and Original Career.
+- Added a compact pure-black TikTok strip only on the FINAL career card in all three single-player modes, encouraging players to tag @football.legacy.game when sharing results.
+- Added the TikTok profile to homepage structured data (sameAs).
+
+No mid-season popups, transfer-screen ads, decision-screen promotions or persistent gameplay banners were added.
