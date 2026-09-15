@@ -1,0 +1,12 @@
+Football Legacy TikTok placement V1.7
+
+Emergency launch-screen layout fix.
+Cause fixed: the bottom TikTok area had been nested inside the centred launch-inner container, so 'bottom' positioned it relative to that container and caused the overlap shown in the screenshot.
+
+Now:
+- Main logo/title/tagline/PLAY remain together in the original centred launch content.
+- FREE BROWSER CAREER SIMULATOR is above the TikTok bar.
+- The free-browser text + TikTok bar are a direct child of the full launch screen.
+- The TikTok bar is pinned to the actual bottom of the screen with safe-area spacing.
+- Other TikTok placements are unchanged.
+- Gameplay and decision logic are unchanged.
