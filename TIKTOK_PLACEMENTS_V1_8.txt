@@ -1,0 +1,11 @@
+Football Legacy TikTok launch layout V1.8
+
+This build fixes the launch screen by using a two-row grid rather than absolute positioning.
+
+Row 1: the original Football Legacy identity + PLAY button.
+Row 2: FREE BROWSER CAREER SIMULATOR, then the TikTok follow bar at the bottom of the screen.
+
+The bottom row participates in layout, so it cannot overlap the title/tagline/PLAY area.
+Tested at 390x844, 430x932, 375x667 and 360x640 CSS-pixel viewports with no overlap.
+All 60 Quick Story decision IDs remain present.
+Other TikTok placements remain unchanged.
