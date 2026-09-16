@@ -1,0 +1,37 @@
+FOOTBALL LEGACY — DECISION EXPANSION V1
+=======================================
+
+Base build:
+Football_Legacy_Legacy_Records_V1_1_SCORE_FIX.zip
+
+Quick Story decision update:
+- Added all 60 requested new decision scenarios.
+- Decisions are context-aware, so situations appear when they make sense for age, role, reputation, club status, position and career stage.
+- Added a recent-decision memory so the same scenarios are not constantly repeated.
+
+Decisions now affect real simulation systems rather than only changing text:
+- transfer probability and number of offers
+- appearances / selection odds
+- match-performance odds and volatility
+- development / OVR growth
+- reputation
+- club/team-result odds
+- captaincy probability
+- international-call-up probability
+- award probability
+
+Transfer example:
+- Strong 'push for a move' choices materially increase the likelihood of a real offer and can create a hotter market.
+- Strong 'commit to staying' choices materially suppress transfer offers.
+- The game still keeps performance, age, club level, budgets and realistic candidate clubs involved, so decisions alter probability rather than guaranteeing an impossible transfer.
+
+Decision consequences:
+- The following season now explicitly reports the chosen action and its direct mechanical effects.
+- Outcomes still include uncertainty, so a risky decision can pay off and a sensible one can occasionally fail.
+
+QA performed:
+- JavaScript syntax validation passed.
+- 60/60 added decision IDs verified.
+- 390px mobile-width decision layout checked with no horizontal overflow.
+- 50 full Quick Story careers simulated with 252 expanded/normal decisions and no failed retirements or page errors.
+- Controlled transfer test showed strong stay decisions producing far fewer offers than neutral choices, while transfer-pushing decisions produced more offers.

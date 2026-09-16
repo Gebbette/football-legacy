@@ -1,0 +1,24 @@
+Football Legacy Multiplayer Full Quick Story Restore
+
+Restored the pre-rewrite multiplayer game layer while retaining the improved room lifecycle.
+
+Restored inside the game:
+- Full Quick Story career UI and player progression
+- Private individual career information before the reveal
+- Season points system and category-by-category points reveal
+- Animated leaderboard reorder and cumulative points race
+- Trophy / award / Ballon d'Or cinema via honours-cinema
+- Private season review before everyone unlocks the shared reveal
+- Final Legacy review before the final leaderboard
+- Same-rarity / same-position multiplayer rules
+- Shared mystery rarity support
+
+Room lifecycle retained / improved:
+- Create and Join room entry
+- Position and rarity selected at room creation
+- Leave Room in lobby and during the career
+- Auto reconnect / saved player slot from the V104.9 recovery layer
+- Host can remove a disconnected player after grace period
+- Play Again with same party
+
+No single-player Quick Story, Express, Original, home page, or the 60-decision expansion was changed.

@@ -1,0 +1,26 @@
+FOOTBALL LEGACY — LEGACY RECORDS V1
+===================================
+
+WHAT'S NEW
+- New home-page tab: Legacy Records.
+- Completed careers are saved on the player's own device using localStorage.
+- Best career score is tracked separately for Quick Story, Career Express and Original Career.
+- Overall records include total careers, total seasons, apps, goals, assists, trophies and awards.
+- Personal records include highest OVR, most goals, most assists, most trophies and longest career.
+- Recent career history is shown with mode, club, score and career totals.
+- Existing completed saves still present on the device are imported automatically where possible.
+
+SAVE SAFETY
+- Existing active career save keys are not changed or deleted.
+- Legacy Records uses its own new storage key: footballLegacy_career_archive_v1
+- Career records survive refreshes/browser restarts on the same device unless the player clears site/browser storage.
+
+FILES TO REPLACE/ADD IN THE WEBSITE ROOT
+- index.html
+- quick-story.html
+- express.html
+- original.html
+- career-history.js (new)
+- career-history.css (new)
+
+No multiplayer files are changed by this update.
